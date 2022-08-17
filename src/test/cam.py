@@ -3,45 +3,64 @@ import math
 import rospy
 from cv_bridge import CvBridge
 from sensor_msgs.msg import Image
-from predictor import predictor, predict_coord
+from scripts.predictor import predictor, predict_coord
 import open3d as o3d
+import numpy as np
 
 
 class camera_node():
     def __init__(self):
         self.bridge = CvBridge()
-        self.predictor = predict_coord('/home/kkiruk/catkin_ws/src/js_ws/src/model_8_16_2_47_8')
+        self.predictor = predict_coord('./models/model_8_17_7_31_29')
         self.predictor.calibrate_camera()
 
     def get_img(self,visualize = False): # (480, 640, 3) (480, 848)
         data = rospy.wait_for_message('/camera/color/image_raw',Image)
         data2 = rospy.wait_for_message('/camera/aligned_depth_to_color/image_raw',Image)   
         cv_image= self.bridge.imgmsg_to_cv2(data,"bgr8")
-        cv_image_depth= self.bridge.imgmsg_to_cv2(data2,"32FC1")
-        cv_image_depth /= 1000 # original depth unit is milimeter
+        cv_image_depth= self.bridge.imgmsg_to_cv2(data2,"32FC1") # original depth unit is milimeter
+        cv_image_depth /= 10 # to centimeter
         image_mask, rgbd_image_list = self.predictor.predict_seg(cv_image, cv_image_depth)
         
-        # get pointcloud
-        pcd0 = self.predictor.get_pointcloud(rgbd_image_list[0])
-        pcd1 = self.predictor.get_pointcloud(rgbd_image_list[1])
-        pcd2 = self.predictor.get_pointcloud(rgbd_image_list[2])
-        pcd3 = self.predictor.get_pointcloud(rgbd_image_list[3])
+        '''get pointcloud'''
+        pcd1 = self.predictor.get_pointcloud(rgbd_image_list[0])
+        pcd2 = self.predictor.get_pointcloud(rgbd_image_list[1])
+        pcd3 = self.predictor.get_pointcloud(rgbd_image_list[2])
 
-        # o3d.visualization.draw_geometries([pcd], zoom=0.5) # 안써도 됨
-        print('pcd0 is :', pcd0) # 안써도 됨
-        print('pcd0 has points :', pcd0.points) # 안써도 됨
-        print('pcd1 is :', pcd1) # 안써도 됨
-        print('pcd1 has points :', pcd1.points) # 안써도 됨
-        print('pcd2 is :', pcd2) # 안써도 됨
-        print('pcd2 has points :', pcd2.points) # 안써도 됨
-        print('pcd3 is :', pcd3) # 안써도 됨
-        print('pcd3 has points :', pcd3.points) # 안써도 됨
-        
-        # # testing shape and depth
-        # print(cv_image.shape,cv_image_depth.shape)
-        # print(cv_image_depth[240,320])
+        '''get center point for pointcloud in centimeters'''
+        # 오류가 나도 그대로 실행되어야한다.
+        try:
+            min_x, min_y, min_z = np.min(pcd1.points, axis=0)
+            max_x, max_y, max_z = np.max(pcd1.points, axis=0)
+            cp = ((min_x + max_x) / 2, (min_y + max_y) / 2, (min_z + max_z) / 2)
+            width = max_x - min_x
+            height = max_y - min_y
+            print("image's center's depth : ", cv_image_depth[320, 240])
+            print("min xyz : ", min_x, min_y, min_z)
+            print("max xyz : ", max_x, max_y, max_z)
+            print("center point : ", cp)
+            print("width : ", width)
+            print("height : ", height)
+            print("==============================================")
+        except(ValueError):
+            print("image's center's depth : ", cv_image_depth[320, 240])
+            print("there is no point cloud")
 
+      
         if visualize:
+            '''showing pointcloud'''
+            vis = o3d.visualization.Visualizer()
+            vis.create_window(width=640, height=480)
+            # axis_pcd = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.01, origin=[0, 0, 0])
+            # vis.add_geometry(axis_pcd)
+            vis.add_geometry(pcd1)
+            vis.add_geometry(pcd2)
+            vis.add_geometry(pcd3)
+            o3d.visualization.ViewControl.set_zoom(vis.get_view_control(), 0.5)
+            vis.run()
+            vis.destroy_window()
+
+            '''showing image, depth, segmentation'''
             demo_image = cv2.resize(cv_image, None,  fx = 0.5, fy = 0.5) 
             demo_image_depth = cv2.resize(cv_image_depth, None,  fx = 0.5, fy = 0.5) 
             demo_image_seg =  cv2.resize(image_mask, None,  fx = 0.5, fy = 0.5) 
@@ -49,7 +68,9 @@ class camera_node():
             cv2.imshow('depth',demo_image_depth)
             cv2.imshow('segmentation',demo_image_seg)
 
-        return cv_image, cv_image_depth, image_mask, (pcd0, pcd1, pcd2, pcd3)
+
+
+        return cv_image, cv_image_depth, image_mask, (pcd1, pcd2, pcd3)
 
 
 if __name__ == '__main__':
