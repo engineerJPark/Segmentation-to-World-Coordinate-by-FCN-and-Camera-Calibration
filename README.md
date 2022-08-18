@@ -23,4 +23,3 @@ python3 test/cam.py
 # TODO
 
 - extrinsic matrix edit
-- point cloud output coordinate check
