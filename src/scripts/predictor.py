@@ -1,57 +1,3 @@
-'''
-Reference
-
-# unit vector from robot frame (world coordinate)
-r_mat1 = np.array([
-  [0., -1., 0.],
-  [1., 0., 0.],
-  [0., 0., 1.]
-])
-r_mat2 = np.array([
-  [1., 0., 0.],
-  [0., 0., -1.],
-  [0., 1., 0.]
-])
-theta = 20 * math.pi / 180 # measured value. degrees to radian
-r_mat3 = np.array([
-  [1., 0., 0.],
-  [0., math.cos(theta), math.sin(theta)],
-  [0., -math.sin(theta), math.cos(theta)]
-])
-r_mat_result_1 = np.matmul(np.matmul(r_mat1, r_mat2), r_mat3)
-
-theta = 20 * math.pi / 180 # measured value. degrees to radian
-r_mat_result = np.array([[0, -1 * math.cos(theta), -1 * math.sin(theta)],
-                  [-1 * math.sin(theta), 0, -1 * math.cos(theta)],
-                  [1, 0, 0]])
-
-print(r_mat_result_1)
-print(r_mat_result_2)
-
-# translation
-# c_mat = np.array([400, 0., 400]) # robot to camera distance. 0.35, 0.4. unit mm 기준
-c_mat = np.array([-350, 0., 380]) # robot to camera distance. 0.35, 0.4. unit mm 기준
-t_mat_result = np.matmul(r_mat_result, c_mat.T)
-
-print(t_mat_result.shape)
-self.extrinsic_mat = np.concatenate((r_mat_result, t_mat_result.reshape(-1,1)), axis=1)
-self.extrinsic_mat = np.concatenate((self.extrinsic_mat, np.array([[0., 0., 0., 1.]])), axis=0)
-'''
-
-'''
-camera calibration을 직접하지 않고, projection matrix로부터 분해해서 얻는 방법은???
-world coordiante 기준 x : 48 cm, y : 0 cm, z : 13 cm
-image plane 기준 : 맨위 35 cm, 양쪽 92 -> 41cm, 거리 48 cm, 아래쪽은 55cm 가로, 거리는 8cm
-
-0, 0, 1 -> 480, 410, 350, 1
-320, 0, 1 -> 480, 0, 350, 1
-640, 0, 1 -> 480, -410, 350, 1
-0, 480, 1 -> 80, 550, 0, 1
-320, 480, 1 -> 80, 0, 0, 1
-640, 480, 1 -> 80, -550, 0, 1
-
-'''
-
 from scripts.fcn import FCN18
 import torch
 import cv2
@@ -149,6 +95,18 @@ class predictor():
 
 class predict_coord(predictor):
   def __init__(self, path):
+    '''
+    camera calibration을 직접하지 않고, projection matrix로부터 분해해서 얻는 방법은???
+    world coordiante 기준 x : 48 cm, y : 0 cm, z : 13 cm
+    image plane 기준 : 맨위 35 cm, 양쪽 92 -> 41cm, 거리 48 cm, 아래쪽은 55cm 가로, 거리는 8cm
+
+    0, 0, 1 -> 480, 410, 350, 1
+    320, 0, 1 -> 480, 0, 350, 1
+    640, 0, 1 -> 480, -410, 350, 1
+    0, 480, 1 -> 80, 550, 0, 1
+    320, 480, 1 -> 80, 0, 0, 1
+    640, 480, 1 -> 80, -550, 0, 1
+    '''
     super(predict_coord, self).__init__(path)
     # intrinsic
     fov_x, fov_y = 69.4, 42.5 # color FOV. depth FOV is 86, 57
