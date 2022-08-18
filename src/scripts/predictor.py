@@ -32,13 +32,12 @@ class predictor():
 
     image_torch = torch.unsqueeze(image_torch, dim=0)
 
-    test_transform = transforms.Compose([ # interpolation=InterpolationMode.BILINEAR
+    test_transform = transforms.Compose([
         transforms.Normalize(mean=(0, 0, 0), std=(255., 255., 255.)),
         transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
     ])
 
     test_seg = self.model(test_transform(image_torch).to(self.device))
-    # test_seg[test_seg <= 8] = 0 # Thresholding
     test_seg = test_seg.cpu()
 
     test_image_channel_idx = torch.argmax(torch.squeeze(test_seg, dim=0), dim=0) # final prediction
@@ -110,11 +109,12 @@ class predict_coord(predictor):
     super(predict_coord, self).__init__(path)
     # intrinsic
     fov_x, fov_y = 69.4, 42.5 # color FOV. depth FOV is 86, 57
-    width, height = 480, 640
+    width, height = 640, 480
     fx, fy = width / (2 * math.tan(fov_x / 2)), width / (2 * math.tan(fov_y / 2))
     cx, cy = width // 2, height // 2 # need to be fixed if so
+    self.intrinsic = o3d.camera.PinholeCameraIntrinsic(width, height, fx, fy, cx, cy)
 
-    theta = 20 * math.pi / 180 # measured value. degrees to radian
+    theta = 15 * math.pi / 180 # measured value. degrees to radian
     A_mat = np.array([
       [480, 410, 350, 1, 0, 0, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 480, 410, 350, 1, 0, 0, 0, 0],
@@ -138,12 +138,12 @@ class predict_coord(predictor):
     idx = np.argmin(eig_val)
     P_flatten = eig_vec[:, idx]
     P_mat = P_flatten.reshape(3, -1)
-    # print("P_mat's norm : ", np.linalg.norm(P_mat))
     
-    self.intrinsic = o3d.camera.PinholeCameraIntrinsic(width, height, fx, fy, cx, cy)
     self.extrinsic_mat = np.matmul(np.linalg.inv(self.intrinsic.intrinsic_matrix), P_mat)
     self.extrinsic_mat = np.concatenate((self.extrinsic_mat, np.array([[0,0,0,1]])), axis=0)
     self.init_pointcloud = o3d.geometry.PointCloud()
+
+    # by QR decomposition
 
   def get_pointcloud(self, rgbd_image):
 
