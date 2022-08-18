@@ -39,7 +39,7 @@ class camera_node():
             print("image's center's depth : ", cv_image_depth[320, 240], "mm")
             print("min xyz : ", min_x, min_y, min_z, "mm")
             print("max xyz : ", max_x, max_y, max_z, "mm")
-            print("center point : ", cp.data, "mm")
+            print("center point : ", cp.tolist(), "mm")
             print("width : ", width, "mm")
             print("height : ", height, "mm")
             print("==============================================")
