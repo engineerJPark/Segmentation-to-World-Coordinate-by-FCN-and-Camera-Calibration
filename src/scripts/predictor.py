@@ -108,13 +108,14 @@ class predict_coord(predictor):
     '''
     super(predict_coord, self).__init__(path)
     # intrinsic
-    fov_x, fov_y = 69.4, 42.5 # color FOV. depth FOV is 86, 57
-    width, height = 640, 480
-    fx, fy = width / (2 * math.tan(fov_x / 2)), width / (2 * math.tan(fov_y / 2))
-    cx, cy = width // 2, height // 2 # need to be fixed if so
-    self.intrinsic = o3d.camera.PinholeCameraIntrinsic(width, height, fx, fy, cx, cy)
+    # fov_x, fov_y = 69.4, 42.5 # color FOV. depth FOV is 86, 57
+    # width, height = 640, 480
+    # fx, fy = width / (2 * math.tan(fov_x / 2)), width / (2 * math.tan(fov_y / 2))
+    # cx, cy = width // 2, height // 2 # need to be fixed if so
+    # self.intrinsic = o3d.camera.PinholeCameraIntrinsic(width, height, fx, fy, cx, cy)
 
-    theta = 15 * math.pi / 180 # measured value. degrees to radian
+    # theta = 15 * math.pi / 180 # measured value. degrees to radian
+
     A_mat = np.array([
       [480, 410, 350, 1, 0, 0, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 480, 410, 350, 1, 0, 0, 0, 0],
@@ -138,9 +139,22 @@ class predict_coord(predictor):
     idx = np.argmin(eig_val)
     P_flatten = eig_vec[:, idx]
     P_mat = P_flatten.reshape(3, -1)
-    
-    self.extrinsic_mat = np.matmul(np.linalg.inv(self.intrinsic.intrinsic_matrix), P_mat)
+
+    P_mat1 = P_mat[:, :-1].copy()
+    self.intrinsic = o3d.camera.PinholeCameraIntrinsic()
+    self.intrinsic.intrinsic_matrix, rotation_matrix = np.linalg.qr(P_mat1)
+
+    P_mat2 = P_mat[:, -1].copy()
+    translation_matrix = np.expand_dims(np.matmul(np.linalg.inv(self.intrinsic.intrinsic_matrix), P_mat2), axis=0)
+
+    print(rotation_matrix.shape)
+    print(translation_matrix.shape)
+
+    self.extrinsic_mat = np.concatenate((rotation_matrix, translation_matrix.T), axis=1)
     self.extrinsic_mat = np.concatenate((self.extrinsic_mat, np.array([[0,0,0,1]])), axis=0)
+
+    print(self.extrinsic_mat.shape)
+
     self.init_pointcloud = o3d.geometry.PointCloud()
 
     # by QR decomposition
