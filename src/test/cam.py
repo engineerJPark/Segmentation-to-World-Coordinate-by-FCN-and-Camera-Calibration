@@ -31,21 +31,27 @@ class camera_node():
             # for class : snack 
             min_x, min_y, min_z = np.min(pcd3.points, axis=0) # 이 곳의 단위가 중요하다.
             max_x, max_y, max_z = np.max(pcd3.points, axis=0)
-            cp = pcd3.get_center()
-            # cp = ((min_y + max_y) / 2, (min_z + max_z) / 2, (min_x + max_x) / 2) # world coordinate 기준
+            cp = pcd3.get_center() # world coordinate 기준
+            # cp_fake = ((min_x + max_x) / 2, (min_y + max_y) / 2, (min_z + max_z) / 2) 
             width = max_y - min_y
             height = max_z - min_z
             depth = max_x - min_x
             print("image's center's depth : ", cv_image_depth[320, 240], "mm")
+            print("")
             print("min xyz : ", min_x, min_y, min_z, "mm")
             print("max xyz : ", max_x, max_y, max_z, "mm")
+            print("")
             print("center point : ", cp.tolist(), "mm")
+            # print("center point : ", cp_fake, "mm")
+            print("")
             print("width : ", width, "mm")
             print("height : ", height, "mm")
+            print("depth : ", depth, "mm")
             print("==============================================")
         except(ValueError):
             print("image's center's depth : ", cv_image_depth[320, 240], "mm")
-            print("there is no point cloud")
+            print("")
+            print("there is no point cloud for class 3 : snack")
             print("==============================================")
 
       
