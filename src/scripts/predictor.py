@@ -94,74 +94,48 @@ class predictor():
 
 class predict_coord(predictor):
   def __init__(self, path):
-    '''
-    camera calibration을 직접하지 않고, projection matrix로부터 분해해서 얻는 방법은???
-    world coordiante 기준 x : 48 cm, y : 0 cm, z : 13 cm
-    image plane 기준 : 맨위 35 cm, 양쪽 92 -> 41cm, 거리 48 cm, 아래쪽은 55cm 가로, 거리는 8cm
-
-    0, 0, 1 -> 480, 410, 350, 1
-    320, 0, 1 -> 480, 0, 350, 1
-    640, 0, 1 -> 480, -410, 350, 1
-    0, 480, 1 -> 80, 550, 0, 1
-    320, 480, 1 -> 80, 0, 0, 1
-    640, 480, 1 -> 80, -550, 0, 1
-    '''
     super(predict_coord, self).__init__(path)
     # intrinsic
-    # fov_x, fov_y = 69.4, 42.5 # color FOV. depth FOV is 86, 57
-    # width, height = 640, 480
-    # fx, fy = width / (2 * math.tan(fov_x / 2)), width / (2 * math.tan(fov_y / 2))
-    # cx, cy = width // 2, height // 2 # need to be fixed if so
-    # self.intrinsic = o3d.camera.PinholeCameraIntrinsic(width, height, fx, fy, cx, cy)
+    fov_x, fov_y = 69.4, 42.5 # color FOV. depth FOV is 86, 57
+    width, height = 480, 640
+    fx, fy = width / (2 * math.tan(fov_x / 2)), width / (2 * math.tan(fov_y / 2))
+    cx, cy = width // 2, height // 2 # need to be fixed if so
+    self.intrinsic = o3d.camera.PinholeCameraIntrinsic(width, height, fx, fy, cx, cy)
 
-    # theta = 15 * math.pi / 180 # measured value. degrees to radian
+    # unit vector from robot frame (world coordinate)
+    # theta = 20 * math.pi / 180 # measured value. degrees to radian
+    # r_mat = np.array([
+    #   [0, -1 * math.sin(theta), 1 * math.cos(theta)],
+    #   [-1, 0, 0],
+    #   [0, -1 * math.cos(theta), -1 * math.sin(theta)]
+    # ])
 
-    A_mat = np.array([
-      [480, 410, 350, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 480, 410, 350, 1, 0, 0, 0, 0],
-
-      [480, 0, 350, 1, 0, 0, 0, 0, -320*480, 0, -320*350, -320],
-      [0, 0, 0, 0, 480, 0, 350, 1, 0, 0, 0, 0],
-
-      [480, -410, 350, 1, 0, 0, 0, 0, -640*480, 640*410, -640*350, -640],
-      [0, 0, 0, 0, 480, -410, 350, 1, 0, 0, 0, 0],
-
-      [80, 550, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 80, 550, 0, 1, -480*80, -480*550, 0, -480],
-
-      [80, 0, 0, 1, 0, 0, 0, 0, -320*80, 0, 0, -320],
-      [0, 0, 0, 0, 80, 0, 0, 1, -480*80, 0, 0, -480],
-
-      [80, -550, 0, 1, 0, 0, 0, 0, -640*80, 640*550, 0, -640],
-      [0, 0, 0, 0, 80, -550, 0, 1, -480*80, 480*550, 0, -480]
+    p = -90 * math.pi / 180
+    t = -20 * math.pi / 180 
+    r_mat2 = np.array([
+      [math.cos(p), math.sin(p), 0],
+      [-math.sin(p) * math.sin(t), math.cos(p) * math.sin(t), -math.cos(t)],
+      [-math.sin(p) * math.cos(t), math.cos(p) * math.cos(t), math.sin(t)]
     ])
-    eig_val, eig_vec = np.linalg.eig(np.matmul(A_mat.T, A_mat))
-    idx = np.argmin(eig_val)
-    P_flatten = eig_vec[:, idx]
-    P_mat = P_flatten.reshape(3, -1)
 
-    P_mat1 = P_mat[:, :-1].copy()
-    self.intrinsic = o3d.camera.PinholeCameraIntrinsic()
-    self.intrinsic.intrinsic_matrix, rotation_matrix = np.linalg.qr(P_mat1)
+    print("r mat : ", r_mat)
+    print("")
+    print("r_mat2 : ", r_mat2)
+    print("")
 
-    P_mat2 = P_mat[:, -1].copy()
-    translation_matrix = np.expand_dims(np.matmul(np.linalg.inv(self.intrinsic.intrinsic_matrix), P_mat2), axis=0)
+    # translation
+    c_mat = np.array([-0.35, 0., 0.4]) # robot to camera distance. 0.35, 0.4
+    t_mat = np.matmul(r_mat, c_mat.T)
 
-    print(rotation_matrix.shape)
-    print(translation_matrix.shape)
-
-    self.extrinsic_mat = np.concatenate((rotation_matrix, translation_matrix.T), axis=1)
-    self.extrinsic_mat = np.concatenate((self.extrinsic_mat, np.array([[0,0,0,1]])), axis=0)
-
-    print(self.extrinsic_mat.shape)
-
+    # extrinsic matrix define
+    self.extrinsic_mat = np.concatenate((r_mat, t_mat.reshape(-1,1)), axis=1)
+    self.extrinsic_mat = np.concatenate((self.extrinsic_mat, np.array([[0., 0., 0., 1.]])), axis=0)
     self.init_pointcloud = o3d.geometry.PointCloud()
-
-    # by QR decomposition
 
   def get_pointcloud(self, rgbd_image):
 
     pcd = self.init_pointcloud.create_from_rgbd_image(rgbd_image, intrinsic=self.intrinsic, extrinsic=self.extrinsic_mat, project_valid_depth_only=True)
-    pcd.transform([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]]) # Flip it, otherwise the pointcloud will be upside down
+    # pcd = self.init_pointcloud.create_from_rgbd_image(rgbd_image, intrinsic=self.intrinsic, project_valid_depth_only=True)
+    pcd.transform([[-1, 0, 0, 0], [0, 1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]]) # flip horizontaly, and depth position
     
     return pcd
