@@ -22,4 +22,13 @@ python3 test/cam.py
 
 # TODO
 
-- extrinsic matrix edit
+## open3d Unprojection Algorithm
+- https://github.com/isl-org/Open3D/blob/534b04716004f04d5d9e419444c11748f4c21dec/cpp/open3d/t/geometry/PointCloud.cpp#L738
+- https://github.com/isl-org/Open3D/blob/ee0fda9bbe8a2981ed04215115a6996df517745d/cpp/open3d/t/geometry/kernel/PointCloud.cpp#L42
+- https://github.com/isl-org/Open3D/blob/534b04716004f04d5d9e419444c11748f4c21dec/cpp/open3d/t/geometry/kernel/PointCloudImpl.h#L58
+- http://www.open3d.org/docs/0.12.0/cpp_api/classopen3d_1_1core_1_1kernel_1_1_transform_indexer.html#af6039b7c93c60c64dcad9e3deb5ab75a
+
+## April Tag and CheckerBoard
+- https://www.google.com/search?q=apriltag&oq=apriltag&aqs=chrome..69i57j0i512l9.3217j0j7&sourceid=chrome&ie=UTF-8
+- https://www.google.com/search?q=checkerboard+depth&oq=checkerboard+depth&aqs=chrome..69i57j33i160l3.11338j0j7&sourceid=chrome&ie=UTF-8
+
