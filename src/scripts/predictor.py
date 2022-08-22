@@ -115,7 +115,7 @@ class predict_coord(predictor):
     r_mat = np.array([[ 0.0141245 , -0.99960032, -0.02448881],
                       [-0.59908249,  0.01114869, -0.80060969],
                       [ 0.80056272,  0.02597903, -0.59868558]])
-    c_mat = np.array([[-0.38],
+    c_mat = np.array([[-0.30],
                       [0],
                       [0.38]])
     t_mat = -np.matmul(r_mat, c_mat)
@@ -130,5 +130,14 @@ class predict_coord(predictor):
 
     pcd = self.init_pointcloud.create_from_rgbd_image(rgbd_image, intrinsic=self.intrinsic, extrinsic=self.extrinsic_mat, project_valid_depth_only=True)
     pcd.transform([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]) # flip
+    pcd = pcd.remove_non_finite_points()
+    pcd, _ = pcd.remove_radius_outlier(nb_points=100, radius=0.01)
+
+    '''
+    http://www.open3d.org/docs/release/python_api/open3d.geometry.PointCloud.html#open3d.geometry.PointCloud.remove_non_finite_points
+    point cloud내에서의 후처리 함수 사용
+    z fix to 5cm
+    z에서의 width를 구하고, 특정 값 이상이면 거절
+    '''
     
     return pcd

@@ -7,7 +7,6 @@ from scripts.predictor import predictor, predict_coord
 import open3d as o3d
 import numpy as np
 
-
 class camera_node():
     def __init__(self):
         self.bridge = CvBridge()
@@ -81,6 +80,9 @@ class camera_node():
 
 
 if __name__ == '__main__':
+    # Ignore warnings in obj loader
+    o3d.utility.set_verbosity_level(o3d.utility.VerbosityLevel.Error)
+    
     cam = camera_node()
     rospy.init_node("cam_test")
 
