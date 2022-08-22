@@ -1,3 +1,9 @@
+'''
+from
+~~~~~~~~~~~~~
+'''
+
+
 import cv2
 import numpy as np
 import os
@@ -44,7 +50,7 @@ cv2.destroyAllWindows()
 
 # ######################################################
 
-# camera 내부 파라미터 
+# camera intrinsic
 cameraMatrix = np.array(
       [
         [623.31476768, 0., 269.87277202],
@@ -53,12 +59,10 @@ cameraMatrix = np.array(
       ]
     )
 
-#distcoeffs는 카메라의 왜곡을 무시하기 때문에 null값 전달
+# distortion parameter
 dist_coeffs = np.array([-0.07379347, 0.66942174, -0.00238366, -0.02229801, -1.27933461])
 
-#solvePnp 함수적용
-# rvec = np.zeros((3,1))
-# tvec = np.zeros((3,1))
+# getting extrinsic parameter
 retval, rvec, tvec = cv2.solvePnP(objpoints, imgpoints, cameraMatrix, dist_coeffs, rvec=None, tvec=None, useExtrinsicGuess=False, flags=cv2.SOLVEPNP_ITERATIVE)
 
 R = cv2.Rodrigues(rvec)

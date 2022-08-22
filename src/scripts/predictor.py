@@ -85,23 +85,18 @@ class predictor():
     rgbd_image_class2 = o3d.geometry.RGBDImage()
     rgbd_image_class3 = o3d.geometry.RGBDImage()
     
-    # open3d.geometry.Image에 맞춰서 넣어줘야한다. depth_scale = 1000.으로 나눠지게 된다.
+    # argument is for open3d.geometry.Image. devide by depth_scale = 1000.
     rgbd_out_class1 = rgbd_image_class1.create_from_color_and_depth(image_o3d_class1, depth_o3d_class1, convert_rgb_to_intensity=False)
     rgbd_out_class3 = rgbd_image_class3.create_from_color_and_depth(image_o3d_class3, depth_o3d_class3, convert_rgb_to_intensity=False)
     rgbd_out_class2 = rgbd_image_class2.create_from_color_and_depth(image_o3d_class2, depth_o3d_class2, convert_rgb_to_intensity=False)
 
-    return test_image_mask, (rgbd_out_class1, rgbd_out_class2, rgbd_out_class3) # RGBDImage
+    return test_image_mask, (rgbd_out_class1, rgbd_out_class2, rgbd_out_class3)
 
 class predict_coord(predictor):
   def __init__(self, path):
     super(predict_coord, self).__init__(path)
-    # # intrinsic. color FOV. depth FOV is 86, 57
-    # fov_x, fov_y = 69.4 * math.pi / 180, 42.5 * math.pi / 180
-    # fx, fy = 640 / (2 * math.tan(fov_x / 2)), 480 / (2 * math.tan(fov_y / 2))
-    # cx, cy = 640 // 2, 480 // 2 # need to be fixed if so
-    # self.intrinsic = o3d.camera.PinholeCameraIntrinsic(640, 480, fx, fy, cx, cy)
 
-    # by opencv
+    # by cv2.calibrateCamera
     self.intrinsic = o3d.camera.PinholeCameraIntrinsic()
     self.intrinsic.intrinsic_matrix = np.array(
       [
@@ -110,6 +105,7 @@ class predict_coord(predictor):
         [0., 0., 1.]
       ]
     )
+
     self.distortion = np.array([-0.07379347, 0.66942174, -0.00238366, -0.02229801, -1.27933461])
 
     r_mat = np.array([[ 0.0141245 , -0.99960032, -0.02448881],
@@ -130,14 +126,9 @@ class predict_coord(predictor):
 
     pcd = self.init_pointcloud.create_from_rgbd_image(rgbd_image, intrinsic=self.intrinsic, extrinsic=self.extrinsic_mat, project_valid_depth_only=True)
     pcd.transform([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]) # flip
+    
+    # post-processing
     pcd = pcd.remove_non_finite_points()
     pcd, _ = pcd.remove_radius_outlier(nb_points=100, radius=0.01)
-
-    '''
-    http://www.open3d.org/docs/release/python_api/open3d.geometry.PointCloud.html#open3d.geometry.PointCloud.remove_non_finite_points
-    point cloud내에서의 후처리 함수 사용
-    z fix to 5cm
-    z에서의 width를 구하고, 특정 값 이상이면 거절
-    '''
     
     return pcd
