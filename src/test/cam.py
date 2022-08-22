@@ -28,20 +28,21 @@ class camera_node():
 
         '''get center point for pointcloud in centimeters'''
         try:
-            depth_scale = 1000
+            depth_scale = 1000 # mm
+            # depth_scale = 1
             # for class : snack. 이 곳의 단위가 중요하다.
             min_x, min_y, min_z = np.min(pcd3.points, axis=0) * depth_scale
             max_x, max_y, max_z = np.max(pcd3.points, axis=0) * depth_scale
-            cp = pcd3.get_center() * 1000 # world coordinate 기준
+            cp = pcd3.get_center() * depth_scale # world coordinate 기준
             width = max_y - min_y
             height = max_z - min_z
 
-            print("image's center's depth : ", cv_image_depth[320, 240], "mm")
+            print("image's center's depth : ", cv_image_depth[320, 240], "mm", "at camera's coordinate")
             print("")
             print("min xyz : ", min_x, min_y, min_z, "mm")
             print("max xyz : ", max_x, max_y, max_z, "mm")
             print("")
-            print("=============:          depth            horizontal            vertical")
+            print("                        depth            horizontal            vertical")
             print("center point : ", cp.tolist(), "mm")
             print("")
             print("width : ", width, "mm")
@@ -56,17 +57,17 @@ class camera_node():
 
       
         if visualize:
-            '''showing pointcloud'''
-            vis = o3d.visualization.Visualizer()
-            vis.create_window(width=640, height=480)
-            # axis_pcd = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.01, origin=[0, 0, 0])
-            # vis.add_geometry(axis_pcd)
-            vis.add_geometry(pcd1)
-            vis.add_geometry(pcd2)
-            vis.add_geometry(pcd3)
-            o3d.visualization.ViewControl.set_zoom(vis.get_view_control(), 0.5)
-            vis.run()
-            vis.destroy_window()
+            # '''showing pointcloud'''
+            # vis = o3d.visualization.Visualizer()
+            # vis.create_window(width=640, height=480)
+            # # axis_pcd = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.01, origin=[0, 0, 0])
+            # # vis.add_geometry(axis_pcd)
+            # vis.add_geometry(pcd1)
+            # vis.add_geometry(pcd2)
+            # vis.add_geometry(pcd3)
+            # o3d.visualization.ViewControl.set_zoom(vis.get_view_control(), 0.5)
+            # vis.run()
+            # vis.destroy_window()
 
             '''showing image, depth, segmentation'''
             demo_image = cv2.resize(cv_image, None,  fx = 0.5, fy = 0.5) 

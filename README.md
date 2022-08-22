@@ -32,3 +32,11 @@ python3 test/cam.py
 - https://www.google.com/search?q=apriltag&oq=apriltag&aqs=chrome..69i57j0i512l9.3217j0j7&sourceid=chrome&ie=UTF-8
 - https://www.google.com/search?q=checkerboard+depth&oq=checkerboard+depth&aqs=chrome..69i57j33i160l3.11338j0j7&sourceid=chrome&ie=UTF-8
 
+## RealSense Py
+- https://dev.intelrealsense.com/docs/python2
+- https://github.com/IntelRealSense/librealsense    
+
+## other camera calibration method
+- https://www.youtube.com/results?search_query=+Nicolai+Nielsen+open3d
+- https://github.com/isl-org/Open3D/issues/791
+- https://stackoverflow.com/questions/65231665/how-to-do-projection-from-world-coordinates-to-pixel-coordinates
