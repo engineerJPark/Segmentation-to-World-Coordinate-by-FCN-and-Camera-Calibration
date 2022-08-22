@@ -1,6 +1,7 @@
 '''
 from
-~~~~~~~~~~~~~
+https://learnopencv.com/camera-calibration-using-opencv/
+with some editing
 '''
 
 
@@ -25,11 +26,6 @@ imgpoints = []
 objp = np.zeros((1, CHECKERBOARD[0] * CHECKERBOARD[1], 3), np.float32)
 objp[0,:,:2] = np.mgrid[0:CHECKERBOARD[0], 0:CHECKERBOARD[1]].T.reshape(-1, 2)
 objp = objp * 2
-
-###########################
-print("objp : \n")
-print(objp)
-###########################
 
 # Extracting path of individual image stored in a given directory
 images = glob.glob('src/dataset/calibration/intrinsic/*.jpg')
@@ -59,14 +55,6 @@ for fname in images:
     cv2.waitKey(0)
 
 cv2.destroyAllWindows()
-
-########################### # 순서봐가면서 이용할 지 결정
-print("objpoints : \n")
-print(objpoints)
-
-print("imgpoints : \n")
-print(imgpoints)
-###########################
 
 h,w = img.shape[:2]
 

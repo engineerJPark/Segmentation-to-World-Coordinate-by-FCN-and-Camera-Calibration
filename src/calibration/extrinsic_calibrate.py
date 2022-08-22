@@ -1,8 +1,8 @@
 '''
 from
-~~~~~~~~~~~~~
+https://foss4g.tistory.com/1665
+with some editing
 '''
-
 
 import cv2
 import numpy as np
@@ -23,8 +23,6 @@ objpoints[0,:,:2] = np.mgrid[0:CHECKERBOARD[0], 0:CHECKERBOARD[1]].T.reshape(-1,
 objpoints = objpoints * 2
 objpoints[0, :, 1] = objpoints[0, :, 1] * (-1)
 
-#####################################################
-
 # Extracting path of individual image stored in a given directory
 img = cv2.imread('/home/kkiruk/catkin_ws/src/js_ws/src/dataset/calibration/extrinsic/rs_image_1.jpg')
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -36,19 +34,9 @@ if ret == True:
     img = cv2.drawChessboardCorners(img, CHECKERBOARD, imgpoints, ret)
     imgpoints = np.squeeze(imgpoints, axis=1)
         
-print("objpoints : \n")
-print(objpoints)
-
-print("imgpoints shape : \n")
-print(imgpoints.shape)
-print("imgpoints : \n")
-print(imgpoints)
-
 cv2.imshow('img',img)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
-
-# ######################################################
 
 # camera intrinsic
 cameraMatrix = np.array(
@@ -68,7 +56,6 @@ retval, rvec, tvec = cv2.solvePnP(objpoints, imgpoints, cameraMatrix, dist_coeff
 R = cv2.Rodrigues(rvec)
 t= tvec
 
-# print(rvec)
 print(R)
 print("\n")
 print(t)

@@ -12,7 +12,11 @@ class camera_node():
         self.bridge = CvBridge()
         self.predictor = predict_coord('./models/model_8_17_7_31_29')
 
-    def get_img(self,visualize = False): # (480, 640, 3) (480, 848)
+    def get_img(self, class_n = 3, searching_class = 2, visualize = False, verbose = False):
+        '''
+        class_n = number of classes without background
+        searching_class : 0, 1, 2. no background
+        '''
         data = rospy.wait_for_message('/camera/color/image_raw',Image)
         data2 = rospy.wait_for_message('/camera/aligned_depth_to_color/image_raw',Image)   
         
@@ -21,40 +25,40 @@ class camera_node():
         image_mask, rgbd_image_list = self.predictor.predict_seg(cv_image, cv_image_depth)
         
         '''get pointcloud'''
-        pcd1 = self.predictor.get_pointcloud(rgbd_image_list[0])
-        pcd2 = self.predictor.get_pointcloud(rgbd_image_list[1])
-        pcd3 = self.predictor.get_pointcloud(rgbd_image_list[2])
+        pcd = []
+        for i in range(class_n):
+            pcd.append(self.predictor.get_pointcloud(rgbd_image_list[i]))
 
-        '''get center point for pointcloud in centimeters'''
-        try:
-            depth_scale = 1000 # mm
-            # depth_scale = 1
-            # for class : snack. 이 곳의 단위가 중요하다.
-            min_x, min_y, min_z = np.min(pcd3.points, axis=0) * depth_scale
-            max_x, max_y, max_z = np.max(pcd3.points, axis=0) * depth_scale
-            cp = pcd3.get_center() * depth_scale # world coordinate 기준
-            width = max_y - min_y
-            height = max_z - min_z
-
+        '''get center point for pointcloud'''
+        if verbose == True:
             print("image's center's depth : ", cv_image_depth[320, 240], "mm", "at camera's coordinate")
-            print("")
-            print("min xyz : ", min_x, min_y, min_z, "mm")
-            print("max xyz : ", max_x, max_y, max_z, "mm")
-            print("")
-            print("                        depth            horizontal            vertical")
-            print("center point : ", cp.tolist(), "mm")
-            print("")
-            print("width : ", width, "mm")
-            print("height : ", height, "mm")
-            print("==============================================")
+            depth_scale = 1000 # mm
+            try:
+                min_x, min_y, min_z = np.min(pcd[searching_class].points, axis=0) * depth_scale
+                max_x, max_y, max_z = np.max(pcd[searching_class].points, axis=0) * depth_scale
+                cp = pcd[searching_class].get_center() * depth_scale # world coordinate 기준
+                width = max_y - min_y
+                height = max_z - min_z
 
-        except(ValueError):
-            print("image's center's depth : ", cv_image_depth[320, 240], "mm")
-            print("")
-            print("there is no point cloud for class 3 : snack")
-            print("==============================================")
+                print("min xyz : ", min_x, min_y, min_z, "mm")
+                print("max xyz : ", max_x, max_y, max_z, "mm")
+                print("")
+                print("                        depth            horizontal            vertical")
+                print("center point : ", cp.tolist(), "mm")
+                print("")
+                print("width : ", width, "mm")
+                print("height : ", height, "mm")
+                print("==============================================")
 
-      
+            except(ValueError):
+                print("there is segmentation or point cloud for searching_class : snack")
+                print("==============================================")
+            except(IndexError):
+                print("give me index between class numbers...")
+            except:
+                print("Unknown Error...")
+
+
         if visualize:
             # '''showing pointcloud'''
             # vis = o3d.visualization.Visualizer()
@@ -76,20 +80,25 @@ class camera_node():
             cv2.imshow('depth',demo_image_depth)
             cv2.imshow('segmentation',demo_image_seg)
 
-        return cv_image, cv_image_depth, image_mask, (pcd1, pcd2, pcd3)
-
+        return cv_image, cv_image_depth, image_mask, pcd
 
 if __name__ == '__main__':
     # Ignore warnings in obj loader
     o3d.utility.set_verbosity_level(o3d.utility.VerbosityLevel.Error)
     
     cam = camera_node()
-    rospy.init_node("cam_test")
+    rospy.init_node("segmentation_to_world")
 
     iter = 1
+
+    try:
+        idx = input("put class number you want.")
+        idx = int(idx)
+    except(ValueError):
+        print("try again, I only get integer.")
     
     while not rospy.is_shutdown():
-        rgb_img, depth_img, _, _ = cam.get_img(visualize=True)
+        rgb_img, depth_img, _, _ = cam.get_img(searching_class = 2, visualize=True, verbose=True)
         k = cv2.waitKey(1) & 0xFF
         if k == ord('q'):
             break 
@@ -98,7 +107,7 @@ if __name__ == '__main__':
             cv2.imwrite(rgb_filename, rgb_img)
             depth_filename = "rs_depth_%d.jpg" % (iter)
             cv2.imwrite(depth_filename, depth_img)
-
             iter += 1
+        
         rospy.sleep(0.2)
     cv2.destroyAllWindows()
