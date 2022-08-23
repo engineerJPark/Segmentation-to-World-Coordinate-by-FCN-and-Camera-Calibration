@@ -21,14 +21,19 @@ objpoints = []
 # Creating vector to store vectors of 2D points for each checkerboard image
 imgpoints = [] 
 
-
 # Defining the world coordinates for 3D points
 objp = np.zeros((1, CHECKERBOARD[0] * CHECKERBOARD[1], 3), np.float32)
 objp[0,:,:2] = np.mgrid[0:CHECKERBOARD[0], 0:CHECKERBOARD[1]].T.reshape(-1, 2)
 objp = objp * 2
+objp[0, :, 1] = objp[0, :, 1] * (-1)
+
+print(objp) ###########
 
 # Extracting path of individual image stored in a given directory
-images = glob.glob('src/dataset/calibration/intrinsic/*.jpg')
+images = glob.glob('src/dataset/calibration/*.jpg')
+images.sort()
+print(images)
+
 for fname in images:
     img = cv2.imread(fname)
     gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
@@ -44,8 +49,8 @@ for fname in images:
     if ret == True:
         objpoints.append(objp)
         # refining pixel coordinates for given 2d points.
-        corners2 = cv2.cornerSubPix(gray, corners, (5,5),(-1,-1), criteria)
-        
+        corners2 = cv2.cornerSubPix(gray, corners, (5,5),(-1,-1), criteria) # W, H 순서로 나온다. u, v
+        print(corners2) ########### corners[:,:,::-1]
         imgpoints.append(corners2)
 
         # Draw and display the corners
@@ -53,6 +58,8 @@ for fname in images:
     
     cv2.imshow('img',img)
     cv2.waitKey(0)
+
+
 
 cv2.destroyAllWindows()
 
@@ -74,3 +81,6 @@ print("rvecs : \n")
 print(rvecs)
 print("tvecs : \n")
 print(tvecs)
+
+R = cv2.Rodrigues(rvecs[-1])
+print(R)

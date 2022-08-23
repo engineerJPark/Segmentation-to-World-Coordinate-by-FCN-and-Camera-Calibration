@@ -3,7 +3,7 @@ import math
 import rospy
 from cv_bridge import CvBridge
 from sensor_msgs.msg import Image
-from scripts.predictor import predictor, predict_coord
+from scripts.predictor import predictor, predict_coord,SEG_CLASS_NAMES
 import open3d as o3d
 import numpy as np
 
@@ -12,11 +12,14 @@ class camera_node():
         self.bridge = CvBridge()
         self.predictor = predict_coord('./models/model_8_17_7_31_29')
 
-    def get_img(self, class_n = 3, searching_class = 2, visualize = False, verbose = False):
+    def get_img(self, searching_class, class_n = 4, visualize = False, verbose = False):
         '''
         class_n = number of classes without background
         searching_class : 0, 1, 2. no background
         '''
+        searching_class -= 1
+        class_n -= 1
+
         data = rospy.wait_for_message('/camera/color/image_raw',Image)
         data2 = rospy.wait_for_message('/camera/aligned_depth_to_color/image_raw',Image)   
         
@@ -37,21 +40,24 @@ class camera_node():
                 min_x, min_y, min_z = np.min(pcd[searching_class].points, axis=0) * depth_scale
                 max_x, max_y, max_z = np.max(pcd[searching_class].points, axis=0) * depth_scale
                 cp = pcd[searching_class].get_center() * depth_scale # world coordinate 기준
+                recommended_grasping_point = cp.copy()
+                recommended_grasping_point[2] = 50 # mm
                 width = max_y - min_y
                 height = max_z - min_z
 
                 print("min xyz : ", min_x, min_y, min_z, "mm")
                 print("max xyz : ", max_x, max_y, max_z, "mm")
                 print("")
-                print("                        depth            horizontal            vertical")
+                print("                      depth(x)            horizontal(y)            vertical(z)")
                 print("center point : ", cp.tolist(), "mm")
+                print("recommended  : ", recommended_grasping_point.tolist(), "mm")
                 print("")
                 print("width : ", width, "mm")
                 print("height : ", height, "mm")
                 print("==============================================")
 
             except(ValueError):
-                print("there is segmentation or point cloud for searching_class : snack")
+                print("there is segmentation or point cloud for searching_class : ", SEG_CLASS_NAMES[searching_class + 1])
                 print("==============================================")
             except(IndexError):
                 print("give me index between class numbers...")
@@ -94,11 +100,16 @@ if __name__ == '__main__':
     try:
         idx = input("put class number you want.")
         idx = int(idx)
+
+        assert idx > 0 and idx <= 3, "No segmentation provided for background."
+
+        print(SEG_CLASS_NAMES[idx])
+
     except(ValueError):
         print("try again, I only get integer.")
     
     while not rospy.is_shutdown():
-        rgb_img, depth_img, _, _ = cam.get_img(searching_class = 2, visualize=True, verbose=True)
+        rgb_img, depth_img, _, _ = cam.get_img(searching_class = idx, visualize=True, verbose=True)
         k = cv2.waitKey(1) & 0xFF
         if k == ord('q'):
             break 
@@ -109,5 +120,5 @@ if __name__ == '__main__':
             cv2.imwrite(depth_filename, depth_img)
             iter += 1
         
-        rospy.sleep(0.2)
+        rospy.sleep(0.5)
     cv2.destroyAllWindows()

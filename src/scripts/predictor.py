@@ -9,6 +9,8 @@ import cv2
 import math
 import open3d as o3d
 
+SEG_CLASS_NAMES = ['bg','roll','sauce','snack']
+
 class predictor():
   def __init__(self, path):
     self.path = path
@@ -98,24 +100,18 @@ class predict_coord(predictor):
 
     # by cv2.calibrateCamera
     self.intrinsic = o3d.camera.PinholeCameraIntrinsic()
-    self.intrinsic.intrinsic_matrix = np.array(
-      [
-        [623.31476768, 0., 269.87277202],
-        [0., 613.62125703 ,237.91605748],
-        [0., 0., 1.]
-      ]
-    )
 
-    self.distortion = np.array([-0.07379347, 0.66942174, -0.00238366, -0.02229801, -1.27933461])
-
-    r_mat = np.array([[ 0.0141245 , -0.99960032, -0.02448881],
-                      [-0.59908249,  0.01114869, -0.80060969],
-                      [ 0.80056272,  0.02597903, -0.59868558]])
+    self.intrinsic.intrinsic_matrix = np.array([[603.41800487, 0., 309.84725778],
+                                                [0., 601.83136706, 263.58976281],
+                                                [0., 0., 1. ]])
+    r_mat = np.array([[ 0.0212196 , -0.99974909, -0.00717518],
+                      [-0.65538637, -0.00849014, -0.75524606],
+                      [ 0.75499565,  0.02072853, -0.65540209]])
     c_mat = np.array([[-0.30],
                       [0],
                       [0.38]])
     t_mat = -np.matmul(r_mat, c_mat)
-
+    
     # extrinsic matrix define
     self.extrinsic_mat = np.concatenate((r_mat, t_mat), axis=1)
     self.extrinsic_mat = np.concatenate((self.extrinsic_mat, np.array([[0., 0., 0., 1.]])), axis=0)
@@ -126,6 +122,11 @@ class predict_coord(predictor):
 
     pcd = self.init_pointcloud.create_from_rgbd_image(rgbd_image, intrinsic=self.intrinsic, extrinsic=self.extrinsic_mat, project_valid_depth_only=True)
     pcd.transform([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]) # flip
+    
+    # height regularizer
+    pcd_points = np.asarray(pcd.points)
+    pcd_points[:,2] = np.clip(pcd_points[:,2], 0, 20)
+    pcd.points = o3d.utility.Vector3dVector(pcd_points)
     
     # post-processing
     pcd = pcd.remove_non_finite_points()
