@@ -29,7 +29,7 @@ cd src
 python3 cam.py
 ```
 
-# mAP and IoU
+# mean IoU
 
 
 
