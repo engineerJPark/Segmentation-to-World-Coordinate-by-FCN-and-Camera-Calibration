@@ -1,9 +1,0 @@
-// Configure tool-specific properties.
-"customizations": {
-  // Configure properties specific to VS Code.
-  "vscode": {
-      "settings": {"shutdownAction": "none"},
-      "extensions": [],
-      "devPort": {}
-      }
-  },
