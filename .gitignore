@@ -161,3 +161,4 @@ cython_debug/
 
 voc_data/
 fcn_model/
+nohup.out
