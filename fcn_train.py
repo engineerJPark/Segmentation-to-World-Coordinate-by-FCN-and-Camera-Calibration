@@ -288,7 +288,7 @@ class FCN18(nn.Module):
 
 epochs = 200
 lr = 1e-4
-weight_decay = 2e-4
+weight_decay = 1e-4
 momentum = 0.9 
 
 model = FCN18(21).to(device)
@@ -322,9 +322,15 @@ def train(model, epochs, optimizer, criterion, verbos_iter=True, verbos_epoch=Tr
       train_img = train_img.to(device)
       train_gt_img = train_gt_img.squeeze(dim=1).to(device)
 
+      # print(train_img.shape)
+      # print(train_gt_img.shape)
+      # print(train_img.permute(0,2,3,1).reshape(-1, 3).shape)
+      # print(train_gt_img.reshape(-1, ).shape)
+
       # prediction
       score_img = model(train_img)
-      score_img = score_img.reshape(-1, score_img.shape[1]) # C H W
+      score_img = score_img.permute(0,2,3,1)
+      score_img = score_img.reshape(-1, score_img.shape[3]) # C H W 
       train_gt_img = train_gt_img.reshape(-1, )
 
       loss = criterion(score_img, train_gt_img)
@@ -362,7 +368,7 @@ def train(model, epochs, optimizer, criterion, verbos_iter=True, verbos_epoch=Tr
   print("Training End")
   return loss_history
 
-history = train(model, epochs, optimizer, criterion)
+history = train(model, epochs, optimizer, criterion, verbos_iter=False)
 plt.plot(history)
 plt.show()
 
