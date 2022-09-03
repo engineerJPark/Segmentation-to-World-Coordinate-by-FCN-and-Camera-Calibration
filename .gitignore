@@ -161,6 +161,8 @@ cython_debug/
 
 voc_data/
 fcn_model/
+tips.md
+do_training.sh
 nohup.out
 FCN.ipynb
 FCN_for_realsens.ipynb
