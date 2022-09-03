@@ -7,7 +7,6 @@ import torch.optim as optim
 import torchvision
 from torchvision import transforms
 from torchvision.transforms.functional import InterpolationMode
-# from torchvision.models import resnet50, ResNet50_Weights
 from torchvision.models import vgg16, VGG16_Weights
 
 from torch.utils.data import DataLoader
@@ -17,10 +16,9 @@ import torchvision.datasets as dset
 
 # for plotting
 import matplotlib.pyplot as plt
-%matplotlib inline
+# %matplotlib inline
 plt.rcParams['figure.figsize'] = (10.0, 20.0) # set default size of plots
 plt.rcParams['image.interpolation'] = 'nearest'
-# plt.rcParams['image.cmap'] = 'gray'
 from matplotlib import cm
 
 import collections
@@ -313,7 +311,8 @@ criterion = nn.CrossEntropyLoss(ignore_index=-1).to(device)
 
 ###########################################
 
-def train(model, epochs, optimizer, criterion, verbos_iter=False, verbos_epoch=True):
+def train(model, epochs, optimizer, criterion, verbos_iter=True, verbos_epoch=True):
+  print("train started")
   loss_history =[]
   last_LOSS = 10 ** 9
 
