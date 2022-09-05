@@ -20,7 +20,7 @@ def foreground_pixel_acc(pred, gt, class_num):
   return true_positive_stack / all_stack
 
 
-def mean_foreground_pixel_acc(val_model, device='cpu'):
+def mean_foreground_pixel_acc(val_model, device='cpu', verbos=True):
   val_model = val_model.to(device)
   val_model.eval()
   print('model evaluation start')
@@ -44,9 +44,10 @@ def mean_foreground_pixel_acc(val_model, device='cpu'):
 
     # print("val_img_class.shape : ", val_img_class.shape) # test
 
-    _, metric = foreground_pixel_acc(val_img_class, val_gt_img, 21)
-    print("acc of %d th " % (iter + 1), " : ", metric)
+    metric = foreground_pixel_acc(val_img_class, val_gt_img, 21)
     acc_stack += metric
+    if verbos==True:
+      print("acc of %d th " % (iter + 1), " : ", metric)
 
   acc = acc_stack / (iter + 1)
   print("pixel acc : ", acc)

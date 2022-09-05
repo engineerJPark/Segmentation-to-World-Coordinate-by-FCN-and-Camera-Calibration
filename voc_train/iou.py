@@ -32,7 +32,7 @@ def iou(pred, target, n_classes):
   return np.array(ious), np.array(ious).mean() 
 
 
-def mean_iou(val_model, device='cpu'):
+def mean_iou(val_model, device='cpu', verbos=True):
   val_model = val_model.to(device)
   val_model.eval()
   print('model evaluation start')
@@ -57,8 +57,9 @@ def mean_iou(val_model, device='cpu'):
     # print("val_img_class.shape : ", val_img_class.shape) # test
 
     _, metric = iou(val_img_class, val_gt_img, 21)
-    print("iou of %d th " % (iter + 1), " : ", metric)
     iou_stack += metric
+    if verbos==True:
+      print("iou of %d th " % (iter + 1), " : ", metric)
 
   mean_iou = iou_stack / (iter + 1)
   print("mean_iou : ", mean_iou)
