@@ -1,64 +1,37 @@
-  def foreground_pixel_acc(pred, gt, class_num):
-    true_positive_stack = 0
-    all_stack = 0
-    for class_i in range(1, class_num+1):
-      true_positive = (pred == class_i) * (gt == class_i)
-      all = (gt == class_i)
+def foreground_pixel_acc(pred, gt, class_num):
+  true_positive_stack = 0
+  all_stack = 0
+  for class_i in range(1, class_num+1):
+    true_positive = (pred == class_i) * (gt == class_i)
+    all = (gt == class_i)
 
-      true_positive_stack += true_positive.sum()
-      all_stack += all.sum()
+    true_positive_stack += true_positive.sum()
+    all_stack += all.sum()
 
-    return true_positive_stack / all_stack
+  return true_positive_stack / all_stack
 
-  ##################################################################
 
-  # foreground pixel accuracy
+def mean_iou(val_model, device='cpu'):
+  val_model = val_model.to(device)
+  val_model.eval()
+  print('model evaluation start')
 
-  with open(os.path.join(ROOT_DIR, "VOCdevkit/VOC2012/ImageSets/Segmentation/val.txt"), 'r') as f:
-    lines = f.readlines()
-  for i in range(len(lines)):
-    lines[i] =  lines[i].strip('\n')
-
-  iter = 0
+  # for test data
+  val_data = VOCClassSegBase(root=ROOT_DIR, split='val', transform_tf=True)
+  val_data_loader = DataLoader(dataset=val_data, batch_size = 1, drop_last=True)
+  
   acc_stack = 0
 
-  for idx in range(len(lines)):
-    test_jpg_path = lines[idx] + '.jpg'
-    test_png_path = lines[idx] + '.png'
-    test_image = PIL.Image.open(os.path.join(ROOT_DIR, 'VOCdevkit/VOC2012', "JPEGImages", test_jpg_path))
-    test_gt_image = PIL.Image.open(os.path.join(ROOT_DIR, 'VOCdevkit/VOC2012', "SegmentationObject", test_png_path))
+  # model prediction
+  for iter, (val_img, val_gt_img) in enumerate(val_data_loader):
+    
+    val_seg = val_model(val_img)
+    test_seg = torch.squeeze(val_seg, dim=0)
+    val_img_class = torch.argmax(val_seg, dim=0).cpu()
 
-    # test image transform & input to test model
-    test_image = np.array(test_image)
-    test_image = torch.from_numpy(test_image).to(torch.float).permute(2,0,1).to(device)
-    ori_x, ori_y = test_image.shape[1], test_image.shape[2]
-    test_image = torch.unsqueeze(test_image, dim=0)
-
-    test_transform = transforms.Compose([
-        transforms.Resize((320,320), interpolation=InterpolationMode.NEAREST),
-        transforms.Normalize(mean=(0, 0, 0), std=(255., 255., 255.)),
-        transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
-    ])
-    return_transform = transforms.Compose([
-        transforms.Resize((ori_x, ori_y), interpolation=InterpolationMode.NEAREST),
-    ])
-
-    test_seg = test_model(test_transform(test_image))
-    test_seg = return_transform(test_seg)
-    # test_seg[test_seg <= 8] = 0 # Thresholdings
-    test_seg = torch.squeeze(test_seg, dim=0)
-
-    # model prediction
-    test_image_channel_idx = torch.argmax(test_seg, dim=0).cpu()
-
-    # ground truth image getting
-    test_gt_image = np.array(test_gt_image)
-    test_gt_image = torch.from_numpy(test_gt_image).to(torch.int)
-
-    iter += 1
-    metric = foreground_pixel_acc(test_image_channel_idx, test_gt_image, 21)
-    print("foreground pixel acc of %d th " % (iter), " : ", metric)
+    _, metric = foreground_pixel_acc(val_img_class, val_gt_img, 21)
+    print("iou of %d th " % (iter + 1), " : ", metric)
     acc_stack += metric
 
-  acc = acc_stack / iter
-  print("acc : ", acc.item())
+  acc = acc_stack / (iter + 1)
+  print("pixel acc : ", acc)
