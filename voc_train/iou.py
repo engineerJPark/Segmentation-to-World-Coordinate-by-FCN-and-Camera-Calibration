@@ -5,6 +5,8 @@ https://stackoverflow.com/a/48383182
 
 from torch.utils.data import DataLoader
 from data import VOCClassSegBase
+import torch
+import numpy as np
 
 # IoU function
 def iou(pred, target, n_classes):
@@ -19,7 +21,8 @@ def iou(pred, target, n_classes):
     target_inds = target == cls
     
     intersection = float((pred_inds * target_inds).sum().item())
-    union = float(torch.max((pred_inds + target_inds).sum().item(), 1)[0]) # prevent divided by 0
+    union = float((pred_inds + target_inds).sum().item()) 
+    if union <= 1 : union = 1 # prevent divided by 0
     
     try:
       ious.append(intersection / union)
@@ -43,12 +46,15 @@ def mean_iou(val_model, device='cpu'):
 
   # model prediction
   for iter, (val_img, val_gt_img) in enumerate(val_data_loader):
-    
+
+    val_img = val_img.to(device)
+    val_gt_img = val_gt_img.squeeze(dim=0).squeeze(dim=0).to(device)
+
     val_seg = val_model(val_img) # 1CHW
     val_seg = torch.squeeze(val_seg, dim=0) # CHW
     val_img_class = torch.argmax(val_seg, dim=0) # HW
 
-    print("val_img_class.shape : ", val_img_class.shape) # test
+    # print("val_img_class.shape : ", val_img_class.shape) # test
 
     _, metric = iou(val_img_class, val_gt_img, 21)
     print("iou of %d th " % (iter + 1), " : ", metric)

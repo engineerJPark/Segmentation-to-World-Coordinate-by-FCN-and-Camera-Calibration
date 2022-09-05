@@ -1,6 +1,7 @@
 import torch
 from torch.utils.data import DataLoader
 from data import VOCClassSegBase
+import numpy as np
 
 # for plotting
 import matplotlib.pyplot as plt
@@ -34,18 +35,18 @@ def seg_plot(val_model, idx, device='cpu'):
   # test image showing
   plt.figure(figsize=(20, 40))
   plt.subplot(1,2,1)
-  plt.imshow(val_gt_img.numpy().cpu()) # ???
+  plt.imshow(val_gt_img.detach().cpu().numpy()) # ???
 
   # print("val_img.shape : ", val_img.shape)
   # print("val_gt_img.shape : ", val_gt_img.shape)
 
   # model prediction
   val_seg = val_model(val_img) # 1 C H W 
-  val_img_class = torch.argmax(torch.squeeze(val_seg, dim=0), dim=0).cpu() # C H W -> HW
+  val_img_class = torch.argmax(torch.squeeze(val_seg, dim=0), dim=0) # C H W -> HW
 
   # model prediction to PIL
   val_img_pil = PIL.Image.fromarray(
-      np.uint8(cm.gist_ncar(val_img_class.detach().numpy()*10)*255)
+      np.uint8(cm.gist_ncar(val_img_class.detach().cpu().numpy()*10)*255)
       )
 
   # predicted data showing

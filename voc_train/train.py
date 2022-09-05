@@ -43,7 +43,7 @@ def train(model, optimizer, criterion, scheduler=None, epochs = 100, device='cpu
 
     now = datetime.datetime.now()
     EPOCH = epoch
-    PATH = "voc_train/fcn_model/model_%d%d_%d" % (now.month, now.day, epoch)
+    PATH = "voc_train/fcn_model/model_%d%d_%d%d_%d" % (now.month, now.day, now.hour, now.minute, epoch + 1)
     LOSS = running_loss
     loss_history.append(LOSS.item())
     

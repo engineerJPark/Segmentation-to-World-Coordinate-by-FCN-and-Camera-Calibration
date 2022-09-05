@@ -25,9 +25,9 @@ if __name__ == '__main__':
   print(device)
 
   model = FCN18(21, device).to(device)
-  # PATH = 'voc_train/fcn_model/model_95_66'
-  # checkpoint = torch.load(PATH)
-  # model.load_state_dict(checkpoint['model_state_dict'])
+  PATH = 'voc_train/fcn_model/model_95_0'
+  checkpoint = torch.load(PATH)
+  model.load_state_dict(checkpoint['model_state_dict'])
   
   lr = 1e-6
   weight_decay = 1e-4
@@ -38,10 +38,11 @@ if __name__ == '__main__':
   scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[150], gamma=0.5)
   # scheduler = None
 
-  history = train(model, optimizer, criterion, scheduler, epochs = 1, \
-                  device=device, verbos_iter=False, verbos_epoch=True)
-  plt.plot(history)
-  plt.show()
+  # # train
+  # history = train(model, optimizer, criterion, scheduler, epochs = 1, \
+  #                 device=device, verbos_iter=True, verbos_epoch=True)
+  # plt.plot(history)
+  # plt.show()
 
   seg_plot(model, 0, device=device)
   mean_iou(model, device=device)
