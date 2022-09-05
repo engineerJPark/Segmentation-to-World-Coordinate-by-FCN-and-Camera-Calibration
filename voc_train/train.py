@@ -1,13 +1,14 @@
 from fcn import FCN18
+from data import VOCClassSegBase
+from torch.utils.data import DataLoader
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import torch.optim as optim
-import torchvision
-from torchvision import transforms
-from torchvision.transforms.functional import InterpolationMode
 
 def train(model, epochs, optimizer, criterion, device='cpu', epochs = 100, lr = 1e-5, weight_decay = 1e-4, momentum = 0.9, pre_model=None, verbos_iter=True, verbos_epoch=True):
+  train_data = VOCClassSegBase(root=ROOT_DIR, split='train', transform_tf=True)
+  train_data_loader = DataLoader(dataset=train_data, batch_size = 1, drop_last=True)
+
   model = FCN18(21).to(device)
   optimizer = optim.SGD(model.parameters(), lr=lr, momentum=momentum, weight_decay=weight_decay)
   criterion = nn.CrossEntropyLoss(ignore_index=-1).to(device)

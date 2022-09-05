@@ -1,5 +1,3 @@
-from torch.utils.data import DataLoader
-
 class VOCClassSegBase(torch.utils.data.Dataset):
 
     class_names = np.array([
@@ -77,6 +75,3 @@ class VOCClassSegBase(torch.utils.data.Dataset):
             return self.transform(img), lbl
         else:
             return img, lbl
-
-train_data = VOCClassSegBase(root=ROOT_DIR, split='train', transform_tf=True)
-train_data_loader = DataLoader(dataset=train_data, batch_size = 1, drop_last=True)

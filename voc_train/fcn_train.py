@@ -1,4 +1,7 @@
-if __name__ = '__main__':
+from train import train
+from predict import predict 
+
+if __name__ = '__main__': 
   if torch.cuda.is_available():
     device = torch.device('cuda')
   else:
