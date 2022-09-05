@@ -59,7 +59,7 @@ def mean_iou(val_model, device='cpu', verbos=True):
     _, metric = iou(val_img_class, val_gt_img, 21)
     iou_stack += metric
     if verbos==True:
-      print("iou of %d th " % (iter + 1), " : ", metric)
+      print("iou of %d th " % (iter + 1), " : ", metric.detach())
 
   mean_iou = iou_stack / (iter + 1)
-  print("mean_iou : ", mean_iou)
+  print("mean_iou : ", mean_iou.detach())

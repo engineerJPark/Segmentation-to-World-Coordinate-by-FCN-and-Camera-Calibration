@@ -35,15 +35,15 @@ if __name__ == '__main__':
   
   optimizer = optim.SGD(model.parameters(), lr=lr, momentum=momentum, weight_decay=weight_decay)
   criterion = nn.CrossEntropyLoss(ignore_index=-1).to(device)
-  scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[150], gamma=0.5)
-  # scheduler = None
+  # scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[150], gamma=0.5)
+  scheduler = None
 
-  # # train
-  # history = train(model, optimizer, criterion, scheduler, epochs = 1, \
-  #                 device=device, verbos_iter=True, verbos_epoch=True)
-  # plt.plot(history)
-  # plt.show()
+  # train
+  history = train(model, optimizer, criterion, scheduler, epochs = 1, \
+                  device=device, verbos_iter=True, verbos_epoch=True)
+  plt.plot(history)
+  plt.show()
 
   seg_plot(model, 0, device=device)
-  mean_iou(model, device=device)
-  mean_foreground_pixel_acc(model, device=device)
+  mean_iou(model, device=device, verbose=False)
+  mean_foreground_pixel_acc(model, device=device, verbose=False)
