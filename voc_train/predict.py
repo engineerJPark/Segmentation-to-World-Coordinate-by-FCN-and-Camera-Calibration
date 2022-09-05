@@ -32,18 +32,8 @@ def seg_plot(val_model, idx, device='cpu'):
   print("val_img.shape : ", val_img.shape)
   print("val_gt_img.shape : ", val_gt_img.shape)
 
-  # test image transform & input to test model
-  # test_image = np.array(test_image)
-  # test_image = torch.from_numpy(test_image).to(torch.float).permute(2,0,1).to(device)
-  # test_image = torch.unsqueeze(test_image, dim=0)
-
-  val_transform = transforms.Compose([
-      transforms.Normalize(mean=(0, 0, 0), std=(255., 255., 255.)),
-      transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
-  ])
-
   # model prediction
-  val_seg = val_model(val_transform(val_img))
+  val_seg = val_model(val_img)
   val_img_class = torch.argmax(torch.squeeze(val_seg, dim=0), dim=0).cpu()
 
   # model prediction to PIL

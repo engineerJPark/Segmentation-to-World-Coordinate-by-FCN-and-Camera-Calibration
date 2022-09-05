@@ -3,78 +3,52 @@ referenced from
 https://stackoverflow.com/a/48383182
 '''
 
+from data import VOCClassSegBase
+
 # IoU function
-def iou(pred, target, n_classes = 4):
+def iou(pred, target, n_classes):
   ious = []
-  pred = pred.view(-1)
-  target = target.view(-1)
+  pred = pred.reshape(-1, )
+  target = target.reshape(-1, )
 
   # Ignore IoU for background class ("0")
-  for cls in range(1, n_classes):  # This goes from 1:n_classes-1 -> class "0" is ignored
+  # This goes from 1:n_classes-1 -> class "0" is ignored
+  for cls in range(1, n_classes):  
     pred_inds = pred == cls
     target_inds = target == cls
     
-    intersection = int((pred_inds * target_inds).sum().item())
-    union = int((pred_inds + target_inds).sum().item())
+    intersection = float((pred_inds * target_inds).sum().item())
+    union = float(torch.max((pred_inds + target_inds).sum().item(), 1)[0]) # prevent divided by 0
     
-    # print(intersection, union) # for test
-    
-    if int(target_inds.sum().item()) == 0 and int(pred_inds.sum().item()) == 0:
+    try:
+      ious.append(intersection / union)
+    except:
       continue
     
-    if union == 0:
-      ious.append(float('nan'))  # If there is no ground truth, do not include in evaluation
-    else:
-      ious.append(float(intersection) / float(union)) # float(max(union, 1)))
-    
-  return np.array(ious), np.array(ious).mean()
+  return np.array(ious), np.array(ious).mean() 
 
+
+def mean_iou(val_model, device='cpu'):
+  val_model = val_model.to(device)
+  val_model.eval()
+  print('model evaluation start')
 
   # for test data
-  with open(os.path.join(ROOT_DIR, "VOCdevkit/VOC2012/ImageSets/Segmentation/val.txt"), 'r') as f:
-    lines = f.readlines()
-  for i in range(len(lines)):
-    lines[i] =  lines[i].strip('\n')
-
-  iter = 0
+  val_data = VOCClassSegBase(root=ROOT_DIR, split='val', transform_tf=True)
+  val_data_loader = DataLoader(dataset=val_data, batch_size = 1, drop_last=True)
+  
   iou_stack = 0
 
-  for idx in range(len(lines)):
-    test_jpg_path = lines[idx] + '.jpg'
-    test_png_path = lines[idx] + '.png'
-    test_image = PIL.Image.open(os.path.join(ROOT_DIR, 'VOCdevkit/VOC2012', "JPEGImages", test_jpg_path))
-    test_gt_image = PIL.Image.open(os.path.join(ROOT_DIR, 'VOCdevkit/VOC2012', "SegmentationObject", test_png_path))
+  # model prediction
+  for iter, (val_img, val_gt_img) in enumerate(val_data_loader):
+    
+    val_seg = val_model(val_transform(val_img))
+    test_seg = torch.squeeze(val_seg, dim=0)
+    val_img_class = torch.argmax(val_seg, dim=0).cpu()
 
-    # test image transform & input to test model
-    test_image = np.array(test_image)
-    test_image = torch.from_numpy(test_image).to(torch.float).permute(2,0,1).to(device)
-    ori_x, ori_y = test_image.shape[1], test_image.shape[2]
-    test_image = torch.unsqueeze(test_image, dim=0)
-
-    test_transform = transforms.Compose([
-        transforms.Normalize(mean=(0, 0, 0), std=(255., 255., 255.)),
-        transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
-    ])
-    # return_transform = transforms.Compose([
-    #     transforms.Resize((ori_x, ori_y), interpolation=InterpolationMode.BILINEAR),
-    # ])
-
-    test_seg = test_model(test_transform(test_image))
-    # test_seg = return_transform(test_seg)
-    # test_seg[test_seg <= 8] = 0 # Thresholdings
-    test_seg = torch.squeeze(test_seg, dim=0)
-
-    # model prediction
-    test_image_channel_idx = torch.argmax(test_seg, dim=0).cpu()
-
-    # ground truth image getting
-    test_gt_image = np.array(test_gt_image)
-    test_gt_image = torch.from_numpy(test_gt_image).to(torch.int)
-
-    iter += 1
-    _, metric = iou(test_image_channel_idx, test_gt_image, 21)
+    _, metric = iou(val_img_class, val_gt_img, 21)
     print("iou of %d th " % (iter), " : ", metric)
     iou_stack += metric
 
-  mean_iou = iou_stack / iter
+  mean_iou = iou_stack / (iter + 1)
   print("mean_iou : ", mean_iou)
