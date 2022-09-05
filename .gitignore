@@ -160,6 +160,7 @@ cython_debug/
 #.idea/
 
 voc_data/
+voc_train/voc_data
 fcn_model/
 tips.md
 do_training.sh

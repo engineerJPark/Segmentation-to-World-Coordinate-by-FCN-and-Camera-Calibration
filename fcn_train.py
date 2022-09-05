@@ -286,28 +286,29 @@ class FCN18(nn.Module):
 
 ###########################################
 
-epochs = 200
-lr = 1e-4
+# epochs = 200
+epochs = 100
+# lr = 1e-4
+lr = 1e-5
 weight_decay = 1e-4
-momentum = 0.9 
+momentum = 0.9
 
 model = FCN18(21).to(device)
 optimizer = optim.SGD(model.parameters(), lr=lr, momentum=momentum, weight_decay=weight_decay)
 criterion = nn.CrossEntropyLoss(ignore_index=-1).to(device)
-
-# scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[50], gamma=0.5)
+scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[150], gamma=0.5)
 
 # ############################################################ fix this path
-# PATH = 'fcn_model/21class_trained/model_8_14_14_14_25_21class' # need to be fixed everytime
+PATH = 'fcn_model/model_94_199' # need to be fixed everytime
 
-# checkpoint = torch.load(PATH)
-# model.load_state_dict(checkpoint['model_state_dict']) 
+checkpoint = torch.load(PATH)
+model.load_state_dict(checkpoint['model_state_dict']) 
 # optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
 # epoch = checkpoint['epoch']
 # loss = checkpoint['loss']
 
-# model.train()
-# print('train mode start')
+model.train()
+print('train mode start')
 
 ###########################################
 
@@ -363,7 +364,7 @@ def train(model, epochs, optimizer, criterion, verbos_iter=True, verbos_epoch=Tr
                   }, PATH)
       last_LOSS = LOSS
       
-    # scheduler.step()
+    scheduler.step()
   
   print("Training End")
   return loss_history
