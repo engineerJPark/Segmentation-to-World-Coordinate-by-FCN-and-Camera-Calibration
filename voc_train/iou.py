@@ -44,9 +44,11 @@ def mean_iou(val_model, device='cpu'):
   # model prediction
   for iter, (val_img, val_gt_img) in enumerate(val_data_loader):
     
-    val_seg = val_model(val_img)
-    test_seg = torch.squeeze(val_seg, dim=0)
-    val_img_class = torch.argmax(val_seg, dim=0).cpu()
+    val_seg = val_model(val_img) # 1CHW
+    val_seg = torch.squeeze(val_seg, dim=0) # CHW
+    val_img_class = torch.argmax(val_seg, dim=0) # HW
+
+    print("val_img_class.shape : ", val_img_class.shape) # test
 
     _, metric = iou(val_img_class, val_gt_img, 21)
     print("iou of %d th " % (iter + 1), " : ", metric)

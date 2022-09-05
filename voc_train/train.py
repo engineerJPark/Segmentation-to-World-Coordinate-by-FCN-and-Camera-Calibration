@@ -5,7 +5,7 @@ import torch
 import datetime
 
 
-def train(model, optimizer, criterion, scheduler=None, epochs = 100, device='cpu',  verbos_iter=True, verbos_epoch=True):
+def train(model, optimizer, criterion, scheduler=None, epochs = 100, device='cpu', verbos_iter=True, verbos_epoch=True):
   ROOT_DIR = 'voc_train/voc_data/'
   train_data = VOCClassSegBase(root=ROOT_DIR, split='train', transform_tf=True)
   train_data_loader = DataLoader(dataset=train_data, batch_size = 1, drop_last=True)
@@ -22,27 +22,20 @@ def train(model, optimizer, criterion, scheduler=None, epochs = 100, device='cpu
       train_img = train_img.to(device)
       train_gt_img = train_gt_img.squeeze(dim=1).to(device)
 
-      # print(train_img.shape)
-      # print(train_gt_img.shape)
-      # print(train_img.permute(0,2,3,1).reshape(-1, 3).shape)
-      # print(train_gt_img.reshape(-1, ).shape)
-
       # prediction
       score_img = model(train_img)
-      score_img = score_img.permute(0,2,3,1)
-      score_img = score_img.reshape(-1, score_img.shape[3]) # C H W 
-      train_gt_img = train_gt_img.reshape(-1, )
+      score_img = score_img.permute(0,2,3,1) # 1 H W C
+      score_img = score_img.reshape(-1, score_img.shape[-1]) # 1 H W C
+      train_gt_img = train_gt_img.reshape(-1, ) # H W
 
       loss = criterion(score_img, train_gt_img)
-
       optimizer.zero_grad()
       loss.backward()
       optimizer.step()
       
+      running_loss += loss
       if verbos_iter == True:
         print("epoch %d, iteration: %d, loss : %f "%(epoch + 1, iter + 1, loss))
-
-      running_loss += loss
     
     if verbos_epoch == True:
       print('======================================')

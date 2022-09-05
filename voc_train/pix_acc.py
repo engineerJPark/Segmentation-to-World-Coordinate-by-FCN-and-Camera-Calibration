@@ -4,6 +4,9 @@ from data import VOCClassSegBase
 def foreground_pixel_acc(pred, gt, class_num):
   true_positive_stack = 0
   all_stack = 0
+
+  # Ignore IoU for background class ("0")
+  # This goes from 1:n_classes-1 -> class "0" is ignored
   for class_i in range(1, class_num+1):
     true_positive = (pred == class_i) * (gt == class_i)
     all = (gt == class_i)
@@ -29,9 +32,11 @@ def mean_foreground_pixel_acc(val_model, device='cpu'):
   # model prediction
   for iter, (val_img, val_gt_img) in enumerate(val_data_loader):
     
-    val_seg = val_model(val_img)
-    test_seg = torch.squeeze(val_seg, dim=0)
-    val_img_class = torch.argmax(val_seg, dim=0).cpu()
+    val_seg = val_model(val_img) # 1CHW
+    val_seg = torch.squeeze(val_seg, dim=0) # CHW
+    val_img_class = torch.argmax(val_seg, dim=0) # HW
+
+    print("val_img_class.shape : ", val_img_class.shape) # test
 
     _, metric = foreground_pixel_acc(val_img_class, val_gt_img, 21)
     print("iou of %d th " % (iter + 1), " : ", metric)

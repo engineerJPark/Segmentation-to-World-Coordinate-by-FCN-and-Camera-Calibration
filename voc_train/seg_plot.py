@@ -24,19 +24,24 @@ def seg_plot(val_model, idx, device='cpu'):
   val_data = VOCClassSegBase(root=ROOT_DIR, split='val', transform_tf=True)
   val_data_loader = DataLoader(dataset=val_data, batch_size = 1, drop_last=True)
 
-  val_img, val_gt_img = val_data_loader[idx]
+  for iter, (val_img, val_gt_img) in enumerate(val_data_loader):
+    if idx == iter:
+      break
+
+  val_img = val_img.to(device)
+  val_gt_img = val_gt_img.squeeze(dim=0).squeeze(dim=0).to(device)
 
   # test image showing
   plt.figure(figsize=(20, 40))
   plt.subplot(1,2,1)
-  plt.imshow(val_gt_img)
+  plt.imshow(val_gt_img.numpy().cpu()) # ???
 
-  print("val_img.shape : ", val_img.shape)
-  print("val_gt_img.shape : ", val_gt_img.shape)
+  # print("val_img.shape : ", val_img.shape)
+  # print("val_gt_img.shape : ", val_gt_img.shape)
 
   # model prediction
-  val_seg = val_model(val_img)
-  val_img_class = torch.argmax(torch.squeeze(val_seg, dim=0), dim=0).cpu()
+  val_seg = val_model(val_img) # 1 C H W 
+  val_img_class = torch.argmax(torch.squeeze(val_seg, dim=0), dim=0).cpu() # C H W -> HW
 
   # model prediction to PIL
   val_img_pil = PIL.Image.fromarray(
