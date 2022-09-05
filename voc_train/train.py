@@ -7,18 +7,10 @@ import torch.optim as optim
 import datetime
 
 
-def train(model, epochs, optimizer, criterion, device='cpu', epochs = 100, lr = 1e-5, weight_decay = 1e-4, momentum = 0.9, pre_model=None, verbos_iter=True, verbos_epoch=True):
+def train(model, optimizer, criterion, scheduler=None, device='cpu', epochs = 100, verbos_iter=True, verbos_epoch=True):
+  ROOT_DIR = 'voc_data'
   train_data = VOCClassSegBase(root=ROOT_DIR, split='train', transform_tf=True)
   train_data_loader = DataLoader(dataset=train_data, batch_size = 1, drop_last=True)
-
-  model = FCN18(21).to(device)
-  optimizer = optim.SGD(model.parameters(), lr=lr, momentum=momentum, weight_decay=weight_decay)
-  criterion = nn.CrossEntropyLoss(ignore_index=-1).to(device)
-  scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[150], gamma=0.5)
-  
-  if pre_model is not None:
-    checkpoint = torch.load(PATH)
-    model.load_state_dict(checkpoint['model_state_dict'])
 
   model.train()
   print('train mode start')
@@ -72,8 +64,9 @@ def train(model, epochs, optimizer, criterion, device='cpu', epochs = 100, lr = 
                   'loss': LOSS,
                   }, PATH)
       last_LOSS = LOSS
-      
-    scheduler.step()
+
+    if scheduler is not None:
+      scheduler.step()
   
   print("Training End")
   return loss_history

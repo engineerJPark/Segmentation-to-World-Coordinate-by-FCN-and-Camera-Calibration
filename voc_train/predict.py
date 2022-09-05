@@ -3,8 +3,8 @@ from torchvision import transforms
 
 # for plotting
 import matplotlib.pyplot as plt
-plt.rcParams['figure.figsize'] = (10.0, 20.0) # set default size of plots
-plt.rcParams['image.interpolation'] = 'nearest'
+# plt.rcParams['figure.figsize'] = (10.0, 20.0) # set default size of plots
+# plt.rcParams['image.interpolation'] = 'nearest'
 from matplotlib import cm
 import PIL
 
@@ -19,6 +19,7 @@ def seg_plot(val_model, idx, device='cpu'):
   val_model.eval()
   print('model evaluation start')
 
+  ROOT_DIR = 'voc_data'
   val_data = VOCClassSegBase(root=ROOT_DIR, split='val', transform_tf=True)
   val_data_loader = DataLoader(dataset=val_data, batch_size = 1, drop_last=True)
 

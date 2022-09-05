@@ -11,12 +11,13 @@ def foreground_pixel_acc(pred, gt, class_num):
   return true_positive_stack / all_stack
 
 
-def mean_iou(val_model, device='cpu'):
+def mean_foreground_pixel_acc(val_model, device='cpu'):
   val_model = val_model.to(device)
   val_model.eval()
   print('model evaluation start')
 
   # for test data
+  ROOT_DIR = 'voc_data'
   val_data = VOCClassSegBase(root=ROOT_DIR, split='val', transform_tf=True)
   val_data_loader = DataLoader(dataset=val_data, batch_size = 1, drop_last=True)
   

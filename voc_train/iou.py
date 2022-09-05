@@ -34,6 +34,7 @@ def mean_iou(val_model, device='cpu'):
   print('model evaluation start')
 
   # for test data
+  ROOT_DIR = 'voc_data'
   val_data = VOCClassSegBase(root=ROOT_DIR, split='val', transform_tf=True)
   val_data_loader = DataLoader(dataset=val_data, batch_size = 1, drop_last=True)
   
