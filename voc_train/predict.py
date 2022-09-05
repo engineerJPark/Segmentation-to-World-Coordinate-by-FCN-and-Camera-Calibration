@@ -1,248 +1,57 @@
-from iou import iou
-
-import numpy as np
-import copy
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
-import torchvision
 from torchvision import transforms
-from torchvision.transforms.functional import InterpolationMode
 
 # for plotting
 import matplotlib.pyplot as plt
-# %matplotlib inline
 plt.rcParams['figure.figsize'] = (10.0, 20.0) # set default size of plots
 plt.rcParams['image.interpolation'] = 'nearest'
 from matplotlib import cm
+import PIL
 
-import collections
-import PIL # turn to dataset
-import os
-import datetime
-
-def predict(test_model, device='cpu'):
+def seg_plot(val_model, idx, device='cpu'):
   '''
-  test_model = FCN18(21).to(device)
+  val_model = FCN18(21).to(device)
   PATH = 'fcn_model/model_9_2_22_52_53'
   checkpoint = torch.load(PATH)
-  test_model.load_state_dict(checkpoint['model_state_dict'])
+  val_model.load_state_dict(checkpoint['model_state_dict'])
   '''
-  test_model = test_model.to(device)
-  test_model.eval()
+  val_model = val_model.to(device)
+  val_model.eval()
   print('model evaluation start')
 
+  val_data = VOCClassSegBase(root=ROOT_DIR, split='val', transform_tf=True)
+  val_data_loader = DataLoader(dataset=val_data, batch_size = 1, drop_last=True)
 
-  # segmentation : plot image
-  with open(os.path.join(ROOT_DIR, "VOCdevkit/VOC2012/ImageSets/Segmentation/train.txt"), 'r') as f:
-    lines = f.readlines()
-  for i in range(len(lines)):
-    lines[i] =  lines[i].strip('\n')
-
-  idx = 1000
-  test_jpg_path = lines[idx] + '.jpg'
-  test_image = PIL.Image.open(os.path.join(ROOT_DIR, 'VOCdevkit/VOC2012', "JPEGImages", test_jpg_path))
+  val_img, val_gt_img = val_data_loader[idx]
 
   # test image showing
   plt.figure(figsize=(20, 40))
   plt.subplot(1,2,1)
-  plt.imshow(test_image)
+  plt.imshow(val_gt_img)
+
+  print("val_img.shape : ", val_img.shape)
+  print("val_gt_img.shape : ", val_gt_img.shape)
 
   # test image transform & input to test model
-  test_image = np.array(test_image)
-  test_image = torch.from_numpy(test_image).to(torch.float).permute(2,0,1).to(device)
-  ori_x, ori_y = test_image.shape[1], test_image.shape[2]
+  # test_image = np.array(test_image)
+  # test_image = torch.from_numpy(test_image).to(torch.float).permute(2,0,1).to(device)
+  # test_image = torch.unsqueeze(test_image, dim=0)
 
-  test_image = torch.unsqueeze(test_image, dim=0)
-
-  test_transform = transforms.Compose([
+  val_transform = transforms.Compose([
       transforms.Normalize(mean=(0, 0, 0), std=(255., 255., 255.)),
       transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
   ])
 
-  test_seg = test_model(test_transform(test_image))
-
   # model prediction
-  test_image_channel_idx = torch.argmax(torch.squeeze(test_seg, dim=0), dim=0).cpu()
+  val_seg = val_model(val_transform(val_img))
+  val_img_class = torch.argmax(torch.squeeze(val_seg, dim=0), dim=0).cpu()
 
   # model prediction to PIL
-  test_image_PIL = PIL.Image.fromarray(
-      np.uint8(cm.gist_ncar(test_image_channel_idx.detach().numpy()*10)*255)
+  val_img_pil = PIL.Image.fromarray(
+      np.uint8(cm.gist_ncar(val_img_class.detach().numpy()*10)*255)
       )
 
   # predicted data showing
   plt.subplot(1,2,2)
-  plt.imshow(test_image_PIL)
+  plt.imshow(val_img_pil)
   plt.show()
-
-  ###############################################
-
-  # segmentation : plot image
-  with open(os.path.join(ROOT_DIR, "VOCdevkit/VOC2012/ImageSets/Segmentation/val.txt"), 'r') as f:
-    lines = f.readlines()
-  for i in range(len(lines)):
-    lines[i] =  lines[i].strip('\n')
-
-  idx = 1000
-  test_jpg_path = lines[idx] + '.jpg'
-  test_image = PIL.Image.open(os.path.join(ROOT_DIR, 'VOCdevkit/VOC2012', "JPEGImages", test_jpg_path))
-
-  # test image showing
-  plt.figure(figsize=(20, 40))
-  plt.subplot(1,2,1)
-  plt.imshow(test_image)
-
-  # test image transform & input to test model
-  test_image = np.array(test_image)
-  test_image = torch.from_numpy(test_image).to(torch.float).permute(2,0,1).to(device)
-  ori_x, ori_y = test_image.shape[1], test_image.shape[2]
-
-  test_image = torch.unsqueeze(test_image, dim=0)
-
-  test_transform = transforms.Compose([
-      transforms.Normalize(mean=(0, 0, 0), std=(255., 255., 255.)),
-      transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
-  ])
-
-  test_seg = test_model(test_transform(test_image))
-
-  # model prediction
-  test_image_channel_idx = torch.argmax(torch.squeeze(test_seg, dim=0), dim=0).cpu()
-
-  # model prediction to PIL
-  test_image_PIL = PIL.Image.fromarray(
-      np.uint8(cm.gist_ncar(test_image_channel_idx.detach().numpy()*10)*255)
-      )
-
-  # predicted data showing
-  plt.subplot(1,2,2)
-  plt.imshow(test_image_PIL)
-  plt.show()
-
-  ##############################################################
-
-  '''
-  referenced from
-  https://stackoverflow.com/a/48383182
-  '''
-
-
-
-  ################################################################
-
-  # for test data
-  with open(os.path.join(ROOT_DIR, "VOCdevkit/VOC2012/ImageSets/Segmentation/val.txt"), 'r') as f:
-    lines = f.readlines()
-  for i in range(len(lines)):
-    lines[i] =  lines[i].strip('\n')
-
-  iter = 0
-  iou_stack = 0
-
-  for idx in range(len(lines)):
-    test_jpg_path = lines[idx] + '.jpg'
-    test_png_path = lines[idx] + '.png'
-    test_image = PIL.Image.open(os.path.join(ROOT_DIR, 'VOCdevkit/VOC2012', "JPEGImages", test_jpg_path))
-    test_gt_image = PIL.Image.open(os.path.join(ROOT_DIR, 'VOCdevkit/VOC2012', "SegmentationObject", test_png_path))
-
-    # test image transform & input to test model
-    test_image = np.array(test_image)
-    test_image = torch.from_numpy(test_image).to(torch.float).permute(2,0,1).to(device)
-    ori_x, ori_y = test_image.shape[1], test_image.shape[2]
-    test_image = torch.unsqueeze(test_image, dim=0)
-
-    test_transform = transforms.Compose([
-        transforms.Normalize(mean=(0, 0, 0), std=(255., 255., 255.)),
-        transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
-    ])
-    # return_transform = transforms.Compose([
-    #     transforms.Resize((ori_x, ori_y), interpolation=InterpolationMode.BILINEAR),
-    # ])
-
-    test_seg = test_model(test_transform(test_image))
-    # test_seg = return_transform(test_seg)
-    # test_seg[test_seg <= 8] = 0 # Thresholdings
-    test_seg = torch.squeeze(test_seg, dim=0)
-
-    # model prediction
-    test_image_channel_idx = torch.argmax(test_seg, dim=0).cpu()
-
-    # ground truth image getting
-    test_gt_image = np.array(test_gt_image)
-    test_gt_image = torch.from_numpy(test_gt_image).to(torch.int)
-
-    iter += 1
-    _, metric = iou(test_image_channel_idx, test_gt_image, 21)
-    print("iou of %d th " % (iter), " : ", metric)
-    iou_stack += metric
-
-  mean_iou = iou_stack / iter
-  print("mean_iou : ", mean_iou)
-
-  ###############################################################
-
-  def foreground_pixel_acc(pred, gt, class_num):
-    true_positive_stack = 0
-    all_stack = 0
-    for class_i in range(1, class_num+1):
-      true_positive = (pred == class_i) * (gt == class_i)
-      all = (gt == class_i)
-
-      true_positive_stack += true_positive.sum()
-      all_stack += all.sum()
-
-    return true_positive_stack / all_stack
-
-  ##################################################################
-
-  # foreground pixel accuracy
-
-  with open(os.path.join(ROOT_DIR, "VOCdevkit/VOC2012/ImageSets/Segmentation/val.txt"), 'r') as f:
-    lines = f.readlines()
-  for i in range(len(lines)):
-    lines[i] =  lines[i].strip('\n')
-
-  iter = 0
-  acc_stack = 0
-
-  for idx in range(len(lines)):
-    test_jpg_path = lines[idx] + '.jpg'
-    test_png_path = lines[idx] + '.png'
-    test_image = PIL.Image.open(os.path.join(ROOT_DIR, 'VOCdevkit/VOC2012', "JPEGImages", test_jpg_path))
-    test_gt_image = PIL.Image.open(os.path.join(ROOT_DIR, 'VOCdevkit/VOC2012', "SegmentationObject", test_png_path))
-
-    # test image transform & input to test model
-    test_image = np.array(test_image)
-    test_image = torch.from_numpy(test_image).to(torch.float).permute(2,0,1).to(device)
-    ori_x, ori_y = test_image.shape[1], test_image.shape[2]
-    test_image = torch.unsqueeze(test_image, dim=0)
-
-    test_transform = transforms.Compose([
-        transforms.Resize((320,320), interpolation=InterpolationMode.NEAREST),
-        transforms.Normalize(mean=(0, 0, 0), std=(255., 255., 255.)),
-        transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
-    ])
-    return_transform = transforms.Compose([
-        transforms.Resize((ori_x, ori_y), interpolation=InterpolationMode.NEAREST),
-    ])
-
-    test_seg = test_model(test_transform(test_image))
-    test_seg = return_transform(test_seg)
-    # test_seg[test_seg <= 8] = 0 # Thresholdings
-    test_seg = torch.squeeze(test_seg, dim=0)
-
-    # model prediction
-    test_image_channel_idx = torch.argmax(test_seg, dim=0).cpu()
-
-    # ground truth image getting
-    test_gt_image = np.array(test_gt_image)
-    test_gt_image = torch.from_numpy(test_gt_image).to(torch.int)
-
-    iter += 1
-    metric = foreground_pixel_acc(test_image_channel_idx, test_gt_image, 21)
-    print("foreground pixel acc of %d th " % (iter), " : ", metric)
-    acc_stack += metric
-
-  acc = acc_stack / iter
-  print("acc : ", acc.item())

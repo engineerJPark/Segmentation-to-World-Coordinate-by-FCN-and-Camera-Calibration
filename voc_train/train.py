@@ -4,6 +4,8 @@ from torch.utils.data import DataLoader
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import datetime
+
 
 def train(model, epochs, optimizer, criterion, device='cpu', epochs = 100, lr = 1e-5, weight_decay = 1e-4, momentum = 0.9, pre_model=None, verbos_iter=True, verbos_epoch=True):
   train_data = VOCClassSegBase(root=ROOT_DIR, split='train', transform_tf=True)
