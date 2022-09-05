@@ -38,7 +38,7 @@ if __name__ == '__main__':
   scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[150], gamma=0.5)
   # scheduler = None
 
-  history = train(model, optimizer, criterion, scheduler, epochs = 2, device=device)
+  history = train(model, optimizer, criterion, scheduler, epochs = 1, device=device)
   plt.plot(history)
   plt.show()  
 
