@@ -45,7 +45,7 @@ def mean_foreground_pixel_acc(val_model, device='cpu'):
     # print("val_img_class.shape : ", val_img_class.shape) # test
 
     _, metric = foreground_pixel_acc(val_img_class, val_gt_img, 21)
-    print("iou of %d th " % (iter + 1), " : ", metric)
+    print("acc of %d th " % (iter + 1), " : ", metric)
     acc_stack += metric
 
   acc = acc_stack / (iter + 1)
