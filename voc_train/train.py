@@ -2,13 +2,11 @@ from fcn import FCN18
 from data import VOCClassSegBase
 from torch.utils.data import DataLoader
 import torch
-import torch.nn as nn
-import torch.optim as optim
 import datetime
 
 
-def train(model, optimizer, criterion, scheduler=None, device='cpu', epochs = 100, verbos_iter=True, verbos_epoch=True):
-  ROOT_DIR = 'voc_data'
+def train(model, optimizer, criterion, scheduler=None, epochs = 100, device='cpu',  verbos_iter=True, verbos_epoch=True):
+  ROOT_DIR = 'voc_train/voc_data/'
   train_data = VOCClassSegBase(root=ROOT_DIR, split='train', transform_tf=True)
   train_data_loader = DataLoader(dataset=train_data, batch_size = 1, drop_last=True)
 

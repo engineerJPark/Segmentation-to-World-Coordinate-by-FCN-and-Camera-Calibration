@@ -17,7 +17,7 @@ def bilinear_kernel_init(Cin, Cout, kernel_size, device):
   return weight.clone().to(device)
 
 class FCN18(nn.Module):
-  def __init__(self, class_n, device=device): # class 20 + 1(bakcground)
+  def __init__(self, class_n, device='cpu'): # class 20 + 1(bakcground)
     super().__init__()
     self.downsample1 = nn.Sequential(
       nn.Conv2d(3,64,3,padding=100),

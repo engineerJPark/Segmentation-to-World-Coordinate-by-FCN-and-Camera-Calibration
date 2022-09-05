@@ -1,5 +1,6 @@
 import torch
-from torchvision import transforms
+from torch.utils.data import DataLoader
+from data import VOCClassSegBase
 
 # for plotting
 import matplotlib.pyplot as plt
@@ -19,7 +20,7 @@ def seg_plot(val_model, idx, device='cpu'):
   val_model.eval()
   print('model evaluation start')
 
-  ROOT_DIR = 'voc_data'
+  ROOT_DIR = 'voc_train/voc_data/'
   val_data = VOCClassSegBase(root=ROOT_DIR, split='val', transform_tf=True)
   val_data_loader = DataLoader(dataset=val_data, batch_size = 1, drop_last=True)
 

@@ -1,11 +1,20 @@
+'''
+TODO
+check whether iou, pix acc is not wrong to control the voc data.
+'''
+
 from train import train
-from predict import predict
+from seg_plot import seg_plot
 from iou import mean_iou
 from pix_acc import mean_foreground_pixel_acc
+from fcn import FCN18
 
+import torch
+import torch.nn as nn
+import torch.optim as optim
 import matplotlib.pyplot as plt
 
-if __name__ = '__main__': 
+if __name__ == '__main__': 
   if torch.cuda.is_available():
     device = torch.device('cuda')
     torch.cuda.manual_seed_all(1)
@@ -15,7 +24,7 @@ if __name__ = '__main__':
   print(torch.__version__)
   print(device)
 
-  model = FCN18(21).to(device)
+  model = FCN18(21, device).to(device)
   # PATH = 'voc_train/fcn_model/model_95_66'
   # checkpoint = torch.load(PATH)
   # model.load_state_dict(checkpoint['model_state_dict'])
@@ -29,8 +38,7 @@ if __name__ = '__main__':
   scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[150], gamma=0.5)
   # scheduler = None
 
-  history = train(model, optimizer, criterion, scheduler, device=device, \
-                  epochs = 2, lr = 1e-5, weight_decay = 1e-4, momentum = 0.9, verbos_iter=False)
+  history = train(model, optimizer, criterion, scheduler, epochs = 2, device=device)
   plt.plot(history)
   plt.show()  
 

@@ -1,4 +1,13 @@
-class VOCClassSegBase(torch.utils.data.Dataset):
+import torch
+from torch.utils.data import DataLoader
+from torchvision import transforms
+import numpy as np
+import os
+import collections
+import PIL
+
+
+class VOCClassSegBase(DataLoader):
 
     class_names = np.array([
         'background',
@@ -24,7 +33,7 @@ class VOCClassSegBase(torch.utils.data.Dataset):
         'tv/monitor',
     ])
 
-    def __init__(self, root='voc_data/', split='train', transform_tf=True):
+    def __init__(self, root='voc_train/voc_data/', split='train', transform_tf=True):
         self.root = root
         self.split = split
         self.transform_tf = transform_tf

@@ -1,3 +1,6 @@
+from torch.utils.data import DataLoader
+from data import VOCClassSegBase
+
 def foreground_pixel_acc(pred, gt, class_num):
   true_positive_stack = 0
   all_stack = 0
@@ -17,7 +20,7 @@ def mean_foreground_pixel_acc(val_model, device='cpu'):
   print('model evaluation start')
 
   # for test data
-  ROOT_DIR = 'voc_data'
+  ROOT_DIR = 'voc_train/voc_data/'
   val_data = VOCClassSegBase(root=ROOT_DIR, split='val', transform_tf=True)
   val_data_loader = DataLoader(dataset=val_data, batch_size = 1, drop_last=True)
   
