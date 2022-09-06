@@ -19,6 +19,7 @@ def train(model, optimizer, criterion, scheduler=None, epochs = 100, device='cpu
   last_LOSS = 10 ** 9
 
   for epoch in range(epochs):
+    model.to(device)
     model.train()
     print('train mode start')
     running_loss = 0
@@ -71,4 +72,4 @@ def train(model, optimizer, criterion, scheduler=None, epochs = 100, device='cpu
       scheduler.step()
   
   print("Training End")
-  return loss_history
+  return loss_history, acc_history, acc_cls_history, mean_iu_history, fwavacc_history
