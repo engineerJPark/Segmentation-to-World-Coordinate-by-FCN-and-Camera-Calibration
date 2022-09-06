@@ -43,7 +43,8 @@ def train(model, optimizer, criterion, scheduler=None, epochs = 100, device='cpu
     
 
     print("epoch %d, loss : %f "%(epoch + 1, running_loss / len(train_data_loader)))
-    acc, acc_cls, mean_iu, fwavacc = label_accuracy_score(model, 21, device='cpu', verbose=True)
+    if epoch % 10 == 0:
+      acc, acc_cls, mean_iu, fwavacc = label_accuracy_score(model, 21, device='cpu', verbose=True)
       
 
     now = datetime.datetime.now()
