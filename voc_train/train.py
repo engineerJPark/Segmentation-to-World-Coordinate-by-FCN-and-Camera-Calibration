@@ -39,7 +39,7 @@ def train(model, optimizer, criterion, scheduler=None, epochs = 100, device='cpu
       
       running_loss += loss
       if verbos_iter == True:
-        print("iteration: %d, loss : %f "%(epoch + 1, iter + 1, loss))
+        print("iteration: %d, loss : %f "%(iter + 1, loss))
     
 
     print("epoch %d, loss : %f "%(epoch + 1, running_loss / len(train_data_loader)))

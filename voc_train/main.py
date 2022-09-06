@@ -22,9 +22,9 @@ if __name__ == '__main__':
   print(torch.__version__, device)
 
   model = FCN18(21, device).to(device)
-  PATH = 'voc_train/fcn_model/model_96_2111_90'
-  checkpoint = torch.load(PATH)
-  model.load_state_dict(checkpoint['model_state_dict'])
+  # PATH = 'voc_train/fcn_model/model_96_2111_90'
+  # checkpoint = torch.load(PATH)
+  # model.load_state_dict(checkpoint['model_state_dict'])
   
   lr = 1e-3
   weight_decay = 1e-4
