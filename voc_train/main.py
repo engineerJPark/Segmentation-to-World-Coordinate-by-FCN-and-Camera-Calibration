@@ -5,7 +5,7 @@ check whether iou, pix acc is not wrong to control the voc data.
 
 from train import train
 from fcn import FCN18
-from utils import label_accuracy_score, mean_iou, mean_foreground_pixel_acc, seg_plot
+from utils import label_accuracy_score
 
 import torch
 import torch.nn as nn
@@ -32,17 +32,16 @@ if __name__ == '__main__':
   
   optimizer = optim.SGD(model.parameters(), lr=lr, momentum=momentum, weight_decay=weight_decay)
   criterion = nn.CrossEntropyLoss(ignore_index=-1).to(device)
-  scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[50,200], gamma=0.1)
+  scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[50,250], gamma=0.1)
   # scheduler = None
 
   # train
-  history = train(model, optimizer, criterion, scheduler, epochs = 400, \
-                  device=device, verbos_iter=False, verbos_epoch=True)
+  history = train(model, optimizer, criterion, scheduler, epochs = 300, \
+                  device=device, verbos_iter=False)
   plt.plot(history)
   plt.show()
-  seg_plot(model, 0, device=device)
-
+  
+  # seg_plot(model, 0, device=device)
   # mean_iou(model, device=device, verbose=False)
   # mean_foreground_pixel_acc(model, device=device, verbose=False)
   acc, acc_cls, mean_iu, fwavacc = label_accuracy_score(model, 21, device=device, verbose=True)
-  
