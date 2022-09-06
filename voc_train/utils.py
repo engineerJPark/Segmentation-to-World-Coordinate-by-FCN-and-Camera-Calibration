@@ -64,11 +64,11 @@ def label_accuracy_score(val_model, n_class, device='cpu', verbose=True):
   mean_iu = np.nanmean(iu)
   freq = hist.sum(axis=1) / hist.sum()
   fwavacc = (freq[freq > 0] * iu[freq > 0]).sum()
-
-  print("acc : ", acc.item())
-  print("acc_cls : ", acc_cls.item())
-  print("mean_iu : ", mean_iu.item())
-  print("fwavacc : ", fwavacc.item())
+  if verbose == True:
+    print("acc : ", acc.item())
+    print("acc_cls : ", acc_cls.item())
+    print("mean_iu : ", mean_iu.item())
+    print("fwavacc : ", fwavacc.item())
   return acc, acc_cls, mean_iu, fwavacc
 
 

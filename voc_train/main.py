@@ -19,13 +19,12 @@ if __name__ == '__main__':
   else:
     device = torch.device('cpu')
     torch.manual_seed(1)
-  print(torch.__version__)
-  print(device)
+  print(torch.__version__, device)
 
   model = FCN18(21, device).to(device)
-  PATH = 'voc_train/fcn_model/model_95_65'
-  checkpoint = torch.load(PATH)
-  model.load_state_dict(checkpoint['model_state_dict'])
+  # PATH = 'voc_train/fcn_model/model_96_0'
+  # checkpoint = torch.load(PATH)
+  # model.load_state_dict(checkpoint['model_state_dict'])
   
   lr = 1e-6
   weight_decay = 1e-4
@@ -33,18 +32,17 @@ if __name__ == '__main__':
   
   optimizer = optim.SGD(model.parameters(), lr=lr, momentum=momentum, weight_decay=weight_decay)
   criterion = nn.CrossEntropyLoss(ignore_index=-1).to(device)
-  # scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[150], gamma=0.5)
-  scheduler = None
+  scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[200], gamma=0.1)
+  # scheduler = None
 
-  # # train
-  # history = train(model, optimizer, criterion, scheduler, epochs = 1, \
-  #                 device=device, verbos_iter=True, verbos_epoch=True)
-  # plt.plot(history)
-  # plt.show()
-  # seg_plot(model, 0, device=device)
+  # train
+  history = train(model, optimizer, criterion, scheduler, epochs = 400, \
+                  device=device, verbos_iter=False, verbos_epoch=True)
+  plt.plot(history)
+  plt.show()
+  seg_plot(model, 0, device=device)
 
   # mean_iou(model, device=device, verbose=False)
   # mean_foreground_pixel_acc(model, device=device, verbose=False)
-  # acc, acc_cls, mean_iu, fwavacc = label_accuracy_score
-
+  acc, acc_cls, mean_iu, fwavacc = label_accuracy_score(model, 21, device=device, verbose=True)
   
