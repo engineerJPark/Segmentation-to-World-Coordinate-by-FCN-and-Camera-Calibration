@@ -76,13 +76,13 @@ class FCN18(nn.Module):
 
     # fc layers
     self.fc6 = nn.Sequential(
-      nn.Conv2d(512, 4096, kernel_size=7, bias=False), 
+      nn.Conv2d(512, 4096, kernel_size=7), 
       nn.ReLU(),
       nn.Dropout2d()
     ).to(device)
     nn.init.xavier_normal_(self.fc6[0].weight)
     self.fc7 = nn.Sequential(
-      nn.Conv2d(4096, 4096, kernel_size=1, bias=False), 
+      nn.Conv2d(4096, 4096, kernel_size=1), 
       nn.ReLU(),
       nn.Dropout2d()
     ).to(device)
@@ -107,8 +107,6 @@ class FCN18(nn.Module):
     
     self.upsample_to_score = nn.ConvTranspose2d(class_n, class_n, kernel_size=16,  stride=8, bias=False).to(device) # to 1 padding=4,
     self.upsample_to_score.weight.data.copy_(bilinear_kernel_init(class_n, class_n, 16, device))
-    # for param in self.upsample_to_score.parameters(): # freeze the last layer
-    #   param.requires_grad = False
 
   def crop_(self, crop_obj, base_obj, crop=True):
       if crop:

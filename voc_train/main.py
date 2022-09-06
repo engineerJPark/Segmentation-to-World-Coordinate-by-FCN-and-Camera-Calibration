@@ -8,6 +8,7 @@ from seg_plot import seg_plot
 from iou import mean_iou
 from pix_acc import mean_foreground_pixel_acc
 from fcn import FCN18
+from utils import label_accuracy_score
 
 import torch
 import torch.nn as nn
@@ -47,3 +48,4 @@ if __name__ == '__main__':
 
   mean_iou(model, device=device, verbose=False)
   mean_foreground_pixel_acc(model, device=device, verbose=False)
+  # acc, acc_cls, mean_iu, fwavacc = label_accuracy_score
