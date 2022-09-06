@@ -40,8 +40,8 @@ if __name__ == '__main__':
                   device=device, verbos_iter=False)
   plt.plot(history)
   plt.show()
-  
+
   # seg_plot(model, 0, device=device)
   # mean_iou(model, device=device, verbose=False)
   # mean_foreground_pixel_acc(model, device=device, verbose=False)
-  acc, acc_cls, mean_iu, fwavacc = label_accuracy_score(model, 21, device=device, verbose=True)
+  acc, acc_cls, mean_iu, fwavacc = label_accuracy_score(model, 21, device='cpu', verbose=True)
