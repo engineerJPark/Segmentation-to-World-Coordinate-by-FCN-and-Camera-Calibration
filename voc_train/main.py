@@ -4,9 +4,8 @@ check whether iou, pix acc is not wrong to control the voc data.
 '''
 
 from train import train
-from seg_plot import seg_plot
 from fcn import FCN18
-from utils import label_accuracy_score, mean_iou, mean_foreground_pixel_acc
+from utils import label_accuracy_score, mean_iou, mean_foreground_pixel_acc, seg_plot
 
 import torch
 import torch.nn as nn
