@@ -43,6 +43,8 @@ if __name__ == '__main__':
   # plt.show()
   # seg_plot(model, 0, device=device)
 
-  mean_iou(model, device=device, verbose=False)
-  mean_foreground_pixel_acc(model, device=device, verbose=False)
+  # mean_iou(model, device=device, verbose=False)
+  # mean_foreground_pixel_acc(model, device=device, verbose=False)
   # acc, acc_cls, mean_iu, fwavacc = label_accuracy_score
+
+  

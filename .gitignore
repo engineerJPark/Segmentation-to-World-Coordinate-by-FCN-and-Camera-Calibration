@@ -167,3 +167,4 @@ do_training.sh
 nohup.out
 FCN.ipynb
 FCN_for_realsens.ipynb
+test.py
