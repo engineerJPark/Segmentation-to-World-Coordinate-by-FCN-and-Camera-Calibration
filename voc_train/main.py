@@ -37,7 +37,7 @@ if __name__ == '__main__':
 
   # train
   history = train(model, optimizer, criterion, scheduler, epochs = 300, \
-                  device=device, verbos_iter=False)
+                  device=device, verbos_iter=True)
   plt.plot(history)
   plt.show()
 

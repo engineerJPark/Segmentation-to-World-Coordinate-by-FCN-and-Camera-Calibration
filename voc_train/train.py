@@ -11,9 +11,6 @@ def train(model, optimizer, criterion, scheduler=None, epochs = 100, device='cpu
   train_data = VOCClassSegBase(root=ROOT_DIR, split='train', transform_tf=True)
   train_data_loader = DataLoader(dataset=train_data, batch_size = 1, drop_last=True)
 
-  model.train()
-  print('train mode start')
-
   loss_history = []
   acc_history = []
   acc_cls_history = []
@@ -22,6 +19,8 @@ def train(model, optimizer, criterion, scheduler=None, epochs = 100, device='cpu
   last_LOSS = 10 ** 9
 
   for epoch in range(epochs):
+    model.train()
+    print('train mode start')
     running_loss = 0
     for iter, (train_img, train_gt_img) in enumerate(train_data_loader):
       train_img = train_img.to(device)
