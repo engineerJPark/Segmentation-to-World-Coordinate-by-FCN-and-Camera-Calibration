@@ -3,9 +3,10 @@ from data import VOCClassSegBase
 from torch.utils.data import DataLoader
 import torch
 import datetime
+from utils import label_accuracy_score
 
 
-def train(model, optimizer, criterion, scheduler=None, epochs = 100, device='cpu', verbos_iter=True, verbos_epoch=True):
+def train(model, optimizer, criterion, scheduler=None, epochs = 100, device='cpu', verbos_iter=True):
   ROOT_DIR = 'voc_train/voc_data/'
   train_data = VOCClassSegBase(root=ROOT_DIR, split='train', transform_tf=True)
   train_data_loader = DataLoader(dataset=train_data, batch_size = 1, drop_last=True)
@@ -13,7 +14,11 @@ def train(model, optimizer, criterion, scheduler=None, epochs = 100, device='cpu
   model.train()
   print('train mode start')
 
-  loss_history =[]
+  loss_history = []
+  acc_history = []
+  acc_cls_history = []
+  mean_iu_history = []
+  fwavacc_history = []
   last_LOSS = 10 ** 9
 
   for epoch in range(epochs):
@@ -35,17 +40,23 @@ def train(model, optimizer, criterion, scheduler=None, epochs = 100, device='cpu
       
       running_loss += loss
       if verbos_iter == True:
-        print("epoch %d, iteration: %d, loss : %f "%(epoch + 1, iter + 1, loss))
+        print("iteration: %d, loss : %f "%(epoch + 1, iter + 1, loss))
     
-    if verbos_epoch == True:
-      print('======================================')
-      print("epoch %d, loss : %f "%(epoch + 1, running_loss / len(train_data_loader)))
+
+    print("epoch %d, loss : %f "%(epoch + 1, running_loss / len(train_data_loader)))
+    acc, acc_cls, mean_iu, fwavacc = label_accuracy_score(model, 21, device=device, verbose=True)
+      
 
     now = datetime.datetime.now()
     EPOCH = epoch
     PATH = "voc_train/fcn_model/model_%d%d_%d%d_%d" % (now.month, now.day, now.hour, now.minute, epoch + 1)
     LOSS = running_loss
+    
     loss_history.append(LOSS.item())
+    acc_history.append(acc.item())
+    acc_cls_history.append(acc_cls.item())
+    mean_iu_history.append(mean_iu.item())
+    fwavacc_history.append(fwavacc.item())
     
     if last_LOSS > LOSS:
       torch.save({

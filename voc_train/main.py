@@ -22,17 +22,17 @@ if __name__ == '__main__':
   print(torch.__version__, device)
 
   model = FCN18(21, device).to(device)
-  # PATH = 'voc_train/fcn_model/model_96_0'
-  # checkpoint = torch.load(PATH)
-  # model.load_state_dict(checkpoint['model_state_dict'])
+  PATH = 'voc_train/fcn_model/model_96_2111_90'
+  checkpoint = torch.load(PATH)
+  model.load_state_dict(checkpoint['model_state_dict'])
   
-  lr = 1e-6
+  lr = 1e-3
   weight_decay = 1e-4
   momentum = 0.9
   
   optimizer = optim.SGD(model.parameters(), lr=lr, momentum=momentum, weight_decay=weight_decay)
   criterion = nn.CrossEntropyLoss(ignore_index=-1).to(device)
-  scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[200], gamma=0.1)
+  scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[50,200], gamma=0.1)
   # scheduler = None
 
   # train
