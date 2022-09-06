@@ -162,3 +162,4 @@ cython_debug/
 voc_train/voc_data/
 voc_train/fcn_model/
 deprecated/
+fcn_model/
