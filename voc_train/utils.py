@@ -75,13 +75,12 @@ import PIL
 
 ##########################################################
 
-def _fast_hist(label_true, label_pred, n_class):
-  mask = (label_true >= 0) & (label_true < n_class)
+def _fast_hist(label_true, label_pred, n_class, device='cpu'):
+  mask = ((label_true >= 0) & (label_true < n_class)).to(device)
   hist = torch.bincount(
       n_class * label_true[mask].to(torch.int) +
-      label_pred[mask], minlength=n_class ** 2).reshape(n_class, n_class)
+      label_pred[mask], minlength=n_class ** 2).reshape(n_class, n_class).to(device)
   return hist
-
 
 def label_accuracy_score(val_model, n_class, device='cpu', verbose=True):
   """Returns accuracy score evaluation result.
@@ -101,7 +100,7 @@ def label_accuracy_score(val_model, n_class, device='cpu', verbose=True):
   val_data = VOCClassSegBase(root=ROOT_DIR, split='val', transform_tf=True)
   val_data_loader = DataLoader(dataset=val_data, batch_size = 1, drop_last=True)
   
-  hist = torch.zeros((n_class, n_class))
+  hist = torch.zeros((n_class, n_class)).to(device)
 
   # model prediction
   for iter, (label_preds, label_trues) in enumerate(val_data_loader):
@@ -112,7 +111,7 @@ def label_accuracy_score(val_model, n_class, device='cpu', verbose=True):
     label_seg = val_model(label_preds) # 1CHW
     label_seg = torch.squeeze(label_seg, dim=0) # CHW
     label_preds = torch.argmax(label_seg, dim=0) # HW
-    hist += _fast_hist(label_trues.flatten(), label_preds.flatten(), n_class)
+    hist += _fast_hist(label_trues.flatten(), label_preds.flatten(), n_class, device=device)
 
 
   acc = torch.diag(hist).sum() / hist.sum()
