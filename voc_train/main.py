@@ -22,9 +22,13 @@ if __name__ == '__main__':
   print(torch.__version__, device)
 
   model = FCN18(21, device).to(device)
-  # PATH = 'voc_train/fcn_model/model_96_2111_90'
-  # checkpoint = torch.load(PATH)
-  # model.load_state_dict(checkpoint['model_state_dict'])
+  past_epoch = 0
+
+  # resume training
+  PATH = 'voc_train/fcn_model/model_97_184_133'
+  checkpoint = torch.load(PATH)
+  model.load_state_dict(checkpoint['model_state_dict'])
+  past_epoch = checkpoint['epoch']
   
   lr = 1e-3
   weight_decay = 1e-4
@@ -36,7 +40,7 @@ if __name__ == '__main__':
   # scheduler = None
 
   # train
-  loss_history, acc_history, acc_cls_history, mean_iu_history, fwavacc_history = train(model, optimizer, criterion, scheduler, epochs = 300, \
+  loss_history, acc_history, acc_cls_history, mean_iu_history, fwavacc_history = train(model, optimizer, criterion, scheduler, epochs = 300 - past_epoch, \
                   device=device, verbose=False)
   plt.plot(loss_history)
   plt.show()

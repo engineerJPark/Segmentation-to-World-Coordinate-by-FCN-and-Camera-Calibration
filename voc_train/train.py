@@ -6,7 +6,7 @@ import datetime
 from utils import label_accuracy_score
 
 
-def train(model, optimizer, criterion, scheduler=None, epochs = 100, device='cpu', verbose=True):
+def train(model, optimizer, criterion, scheduler=None, epochs=300, device='cpu', verbose=True):
   ROOT_DIR = 'voc_train/voc_data/'
   train_data = VOCClassSegBase(root=ROOT_DIR, split='train', transform_tf=True)
   train_data_loader = DataLoader(dataset=train_data, batch_size = 1, drop_last=True)
@@ -41,14 +41,14 @@ def train(model, optimizer, criterion, scheduler=None, epochs = 100, device='cpu
       running_loss += loss
       if (iter + 1) % 100 == 0 and verbose == True:
         print("iteration: %d, loss : %f "%(iter + 1, loss))
-        
+
     print('====================================')
     print("epoch %d, loss : %f "%(epoch + 1, running_loss / len(train_data_loader)))
     acc, acc_cls, mean_iu, fwavacc = label_accuracy_score(model, 21, device=device, verbose=True)    
 
     now = datetime.datetime.now()
     EPOCH = epoch
-    PATH = "voc_train/fcn_model/model_%d%d_%d%d_%d" % (now.month, now.day, now.hour, now.minute, epoch + 1)
+    PATH = "voc_train/fcn_model/model_%d_%d_%d_%d_%d" % (now.month, now.day, now.hour, now.minute, epoch + 1)
     LOSS = running_loss
     
     loss_history.append(LOSS.item())
