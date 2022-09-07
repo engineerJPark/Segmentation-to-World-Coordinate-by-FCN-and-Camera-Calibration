@@ -6,19 +6,20 @@ import datetime
 from utils import label_accuracy_score
 
 
-def train(model, optimizer, criterion, scheduler=None, epochs=300, device='cpu', verbose=True):
+def train(model, optimizer, criterion, scheduler=None, epochs=300, resume_epoch=None, device='cpu', verbose=True):
   ROOT_DIR = 'voc_train/voc_data/'
   train_data = VOCClassSegBase(root=ROOT_DIR, split='train', transform_tf=True)
   train_data_loader = DataLoader(dataset=train_data, batch_size = 1, drop_last=True)
 
   loss_history = []
-  acc_history = []
-  acc_cls_history = []
-  mean_iu_history = []
-  fwavacc_history = []
   last_LOSS = 10 ** 9
 
   for epoch in range(epochs):
+    if resume_epoch is not None and resume_epoch >= epoch:
+      if scheduler is not None:
+        scheduler.step()
+      continue
+
     model.to(device)
     model.train()
     print('train mode start')
@@ -44,7 +45,6 @@ def train(model, optimizer, criterion, scheduler=None, epochs=300, device='cpu',
 
     print('====================================')
     print("epoch %d, loss : %f "%(epoch + 1, running_loss / len(train_data_loader)))
-    # acc, acc_cls, mean_iu, fwavacc = label_accuracy_score(model, 21, device=device, verbose=True)    
 
     now = datetime.datetime.now()
     EPOCH = epoch
@@ -52,10 +52,6 @@ def train(model, optimizer, criterion, scheduler=None, epochs=300, device='cpu',
     LOSS = running_loss
     
     loss_history.append(LOSS.item())
-    # acc_history.append(acc.item())
-    # acc_cls_history.append(acc_cls.item())
-    # mean_iu_history.append(mean_iu.item())
-    # fwavacc_history.append(fwavacc.item())
     
     if last_LOSS > LOSS:
       torch.save({
@@ -70,4 +66,4 @@ def train(model, optimizer, criterion, scheduler=None, epochs=300, device='cpu',
       scheduler.step()
   
   print("Training End")
-  return loss_history, acc_history, acc_cls_history, mean_iu_history, fwavacc_history
+  return loss_history

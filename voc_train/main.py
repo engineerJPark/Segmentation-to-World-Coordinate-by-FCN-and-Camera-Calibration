@@ -40,15 +40,11 @@ if __name__ == '__main__':
   # scheduler = None
 
   # train
-  loss_history, acc_history, acc_cls_history, mean_iu_history, fwavacc_history = train(model, optimizer, criterion, scheduler, epochs = 300 - past_epoch, \
+  loss_history= train(model, optimizer, criterion, scheduler, epochs = 300 - past_epoch, \
                   device=device, verbose=False)
   plt.plot(loss_history)
   plt.show()
   print(loss_history)
-  # print(acc_history)
-  # print(acc_cls_history)
-  # print(mean_iu_history)
-  # print(fwavacc_history)
 
   # seg_plot(model, 0, device=device)
   # mean_iou(model, device=device, verbose=False)
