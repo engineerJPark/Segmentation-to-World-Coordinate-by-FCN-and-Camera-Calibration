@@ -37,7 +37,7 @@ if __name__ == '__main__':
 
   # train
   loss_history, acc_history, acc_cls_history, mean_iu_history, fwavacc_history = train(model, optimizer, criterion, scheduler, epochs = 300, \
-                  device=device, verbos_iter=True)
+                  device=device, verbose=False)
   plt.plot(loss_history)
   plt.show()
   print(loss_history)
