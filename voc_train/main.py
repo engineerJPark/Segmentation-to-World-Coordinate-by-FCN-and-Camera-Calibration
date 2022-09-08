@@ -25,7 +25,7 @@ if __name__ == '__main__':
   past_epoch = 0
 
   # resume training
-  PATH = 'voc_train/fcn_model/model_97_347_10'
+  PATH = 'voc_train/fcn_model/model_97_1729_130'
   checkpoint = torch.load(PATH)
   model.load_state_dict(checkpoint['model_state_dict'])
   past_epoch = checkpoint['epoch']
