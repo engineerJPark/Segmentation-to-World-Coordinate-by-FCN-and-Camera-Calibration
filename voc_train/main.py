@@ -25,28 +25,31 @@ if __name__ == '__main__':
   past_epoch = 0
 
   # resume training
-  PATH = 'voc_train/fcn_model/model_97_184_133'
+  PATH = 'voc_train/fcn_model/model_97_347_10'
   checkpoint = torch.load(PATH)
   model.load_state_dict(checkpoint['model_state_dict'])
   past_epoch = checkpoint['epoch']
+  print("past_epoch : ", past_epoch)
   
-  lr = 1e-3
+  lr = 1e-4
   weight_decay = 1e-4
   momentum = 0.9
   
   optimizer = optim.SGD(model.parameters(), lr=lr, momentum=momentum, weight_decay=weight_decay)
   criterion = nn.CrossEntropyLoss(ignore_index=-1).to(device)
-  scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[50,250], gamma=0.1)
+  # scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[50,250], gamma=0.1)
+  # scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[250 - past_epoch], gamma=0.1)
   # scheduler = None
 
-  # train
-  loss_history= train(model, optimizer, criterion, scheduler, epochs = 300 - past_epoch, \
-                  device=device, verbose=False)
-  plt.plot(loss_history)
-  plt.show()
-  print(loss_history)
+  # # train
+  # loss_history= train(model, optimizer, criterion, scheduler, epochs = 100, \
+  #                 device=device, verbose=False)
+  # plt.plot(loss_history)
+  # plt.show()
+  # plt.savefig('voc_train/loss_history.jpg')
+  # print(loss_history)
 
   # seg_plot(model, 0, device=device)
   # mean_iou(model, device=device, verbose=False)
   # mean_foreground_pixel_acc(model, device=device, verbose=False)
-  acc, acc_cls, mean_iu, fwavacc = label_accuracy_score(model, 21, device='cpu', verbose=True)
+  acc, acc_cls, mean_iu, fwavacc = label_accuracy_score(model, 21, device=device, verbose=True)

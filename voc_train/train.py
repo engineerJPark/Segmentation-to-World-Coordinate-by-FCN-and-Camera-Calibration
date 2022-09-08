@@ -6,7 +6,7 @@ import datetime
 from utils import label_accuracy_score
 
 
-def train(model, optimizer, criterion, scheduler=None, epochs=300, resume_epoch=None, device='cpu', verbose=True):
+def train(model, optimizer, criterion, scheduler=None, epochs=300, device='cpu', verbose=True):
   ROOT_DIR = 'voc_train/voc_data/'
   train_data = VOCClassSegBase(root=ROOT_DIR, split='train', transform_tf=True)
   train_data_loader = DataLoader(dataset=train_data, batch_size = 1, drop_last=True)
@@ -15,11 +15,6 @@ def train(model, optimizer, criterion, scheduler=None, epochs=300, resume_epoch=
   last_LOSS = 10 ** 9
 
   for epoch in range(epochs):
-    if resume_epoch is not None and resume_epoch >= epoch:
-      if scheduler is not None:
-        scheduler.step()
-      continue
-
     model.to(device)
     model.train()
     print('train mode start')
@@ -53,11 +48,12 @@ def train(model, optimizer, criterion, scheduler=None, epochs=300, resume_epoch=
     
     loss_history.append(LOSS.item())
     
-    if last_LOSS > LOSS:
+    if (epoch + 1) % 5 == 0 and last_LOSS > LOSS:
       torch.save({
                   'epoch': EPOCH,
                   'model_state_dict': model.state_dict(),
                   'optimizer_state_dict': optimizer.state_dict(),
+                  'scheduler_state_dict': scheduler.state_dict(), ###
                   'loss': LOSS,
                   }, PATH)
       last_LOSS = LOSS

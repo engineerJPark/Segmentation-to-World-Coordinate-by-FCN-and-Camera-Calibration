@@ -13,6 +13,10 @@ from matplotlib import cm
 import PIL
 
 def _fast_hist(label_true, label_pred, n_class, device='cpu'):
+  '''
+  row = ground truth
+  column = prediction
+  '''
   mask = ((label_true >= 0) & (label_true < n_class)).to(device)
   hist = torch.bincount(
       n_class * label_true[mask].to(torch.int) +
