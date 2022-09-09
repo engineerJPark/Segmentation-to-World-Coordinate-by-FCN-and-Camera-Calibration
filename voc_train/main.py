@@ -24,8 +24,6 @@ if __name__ == '__main__':
 
   model = FCN18(21)
   model.copy_params_from_vgg16(vgg16(weights=VGG16_Weights.DEFAULT))
-  model = model.to(device)
-
 
   # # resume training
   # PATH = 'voc_train/fcn_model/model_97_1729_130'
@@ -34,7 +32,7 @@ if __name__ == '__main__':
   # past_epoch = checkpoint['epoch']
   # print("past_epoch : ", past_epoch)
   
-  epochs = 200
+  epochs = 300
   lr = 1e-4
   weight_decay = 5e-4
   momentum = 0.99
@@ -42,8 +40,6 @@ if __name__ == '__main__':
   optimizer = optim.SGD(model.parameters(), lr=lr, momentum=momentum, weight_decay=weight_decay)
   criterion = nn.CrossEntropyLoss(ignore_index=-1).to(device)
   scheduler = None
-  # scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[50,250], gamma=0.1)
-  # scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[250 - past_epoch], gamma=0.1)  
 
   # train
   loss_history= train(model, optimizer, criterion, scheduler, epochs = epochs, device=device)

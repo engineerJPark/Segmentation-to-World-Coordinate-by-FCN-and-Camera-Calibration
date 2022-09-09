@@ -18,9 +18,10 @@ def train(model, optimizer, criterion, scheduler=None, epochs=300, device='cpu',
   model.train()
   print('train mode start')
 
+  # memory 누수
   for epoch in range(epochs):
-    optimizer.zero_grad()
-    loss = 0
+    
+    total_loss = 0
     for iter, (train_img, train_gt_img) in enumerate(train_data_loader):
       train_img = train_img.to(device)
       train_gt_img = train_gt_img.squeeze(dim=1).to(device)
@@ -31,28 +32,29 @@ def train(model, optimizer, criterion, scheduler=None, epochs=300, device='cpu',
       score_img = score_img.reshape(-1, score_img.shape[-1]) # 1 H W C
       train_gt_img = train_gt_img.reshape(-1, ) # H W
 
-      loss += criterion(score_img, train_gt_img)
-
-    loss /= len(train_data_loader)
-    loss.backward()
-    optimizer.step()
+      optimizer.zero_grad()
+      loss = criterion(score_img, train_gt_img)
+      loss.backward()
+      optimizer.step()
+      total_loss += loss.data
+    total_loss /= len(train_data_loader)
 
     print('====================================')
-    print("epoch %d, loss : %f "%(epoch + 1, loss / len(train_data_loader)))
-
-    now = datetime.datetime.now()
-    PATH = "voc_train/fcn_model/model_%d_%d_%d_%d_%d" % (now.month, now.day, now.hour, now.minute, epoch + 1)
+    print("epoch %d, loss : %f "%(epoch + 1, total_loss))
     loss_history.append(loss.item())
+
     
     if (epoch + 1) % 5 == 0 and last_loss > loss:
+      now = datetime.datetime.now()
+      PATH = "voc_train/fcn_model/model_%d_%d_%d_%d_%d" % (now.month, now.day, now.hour, now.minute, epoch + 1)
       torch.save({
                   'epoch': epoch + 1,
                   'model_state_dict': model.state_dict(),
                   'optimizer_state_dict': optimizer.state_dict(),
                   'scheduler_state_dict': scheduler.state_dict(),
-                  'loss': loss
+                  'loss': total_loss
                   }, PATH)
-      last_loss = loss
+      last_loss = total_loss
 
     if scheduler is not None:
       scheduler.step()
