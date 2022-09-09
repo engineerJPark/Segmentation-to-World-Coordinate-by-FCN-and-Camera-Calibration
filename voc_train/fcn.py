@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 # Bilinear weights deconvolution Algorithm
-def bilinear_kernel_init(Cin, Cout, kernel_size, device):
+def bilinear_kernel_init(Cin, Cout, kernel_size):
   factor = (kernel_size + 1) // 2
   if kernel_size % 2 == 1:
     center = factor - 1
@@ -14,143 +14,166 @@ def bilinear_kernel_init(Cin, Cout, kernel_size, device):
 
   weight = torch.zeros((Cin, Cout, kernel_size, kernel_size))
   weight[range(Cin), range(Cout), :, :] = filter
-  return weight.clone().to(device)
+  return weight.to(torch.float)
 
 class FCN18(nn.Module):
-  def __init__(self, class_n, device='cpu'): # class 20 + 1(bakcground)
+  def __init__(self, class_n): # class 20 + 1(bakcground)
     super().__init__()
     self.downsample1 = nn.Sequential(
       nn.Conv2d(3,64,3,padding=100),
-      nn.BatchNorm2d(64),
       nn.ReLU(inplace=True),
       nn.Conv2d(64,64,3,padding=1),
-      nn.BatchNorm2d(64),
       nn.ReLU(inplace=True),
       nn.MaxPool2d(2, stride=2, ceil_mode=True)
-    ).to(device)
+    )
     self.downsample2 = nn.Sequential(
       nn.Conv2d(64,128,3,padding=1),
-      nn.BatchNorm2d(128),
       nn.ReLU(inplace=True),
       nn.Conv2d(128,128,3,padding=1),
-      nn.BatchNorm2d(128),
       nn.ReLU(inplace=True),
       nn.MaxPool2d(2, stride=2, ceil_mode=True)
-    ).to(device)
+    )
     self.downsample3 = nn.Sequential(
       nn.Conv2d(128,256,3,padding=1),
-      nn.BatchNorm2d(256),
       nn.ReLU(inplace=True),
       nn.Conv2d(256,256,3,padding=1),
-      nn.BatchNorm2d(256),
       nn.ReLU(inplace=True),
       nn.Conv2d(256,256,3,padding=1),
-      nn.BatchNorm2d(256),
       nn.ReLU(inplace=True),
       nn.MaxPool2d(2, stride=2, ceil_mode=True)
-    ).to(device)
+    )
     self.downsample4 = nn.Sequential(
       nn.Conv2d(256,512,3,padding=1),
-      nn.BatchNorm2d(512),
       nn.ReLU(inplace=True),
       nn.Conv2d(512,512,3,padding=1),
-      nn.BatchNorm2d(512),
       nn.ReLU(inplace=True),
       nn.Conv2d(512,512,3,padding=1),
-      nn.BatchNorm2d(512),
       nn.ReLU(inplace=True),
       nn.MaxPool2d(2, stride=2, ceil_mode=True)
-    ).to(device)
+    )
     self.downsample5 = nn.Sequential(
       nn.Conv2d(512,512,3,padding=1),
-      nn.BatchNorm2d(512),
       nn.ReLU(inplace=True),
       nn.Conv2d(512,512,3,padding=1),
-      nn.BatchNorm2d(512),
       nn.ReLU(inplace=True),
       nn.Conv2d(512,512,3,padding=1),
-      nn.BatchNorm2d(512),
       nn.ReLU(inplace=True),
       nn.MaxPool2d(2, stride=2, ceil_mode=True)
-    ).to(device)
+    )
 
     # fc layers
     self.fc6 = nn.Sequential(
       nn.Conv2d(512, 4096, kernel_size=7), 
       nn.ReLU(),
       nn.Dropout2d()
-    ).to(device)
+    )
     nn.init.xavier_normal_(self.fc6[0].weight)
     self.fc7 = nn.Sequential(
       nn.Conv2d(4096, 4096, kernel_size=1), 
       nn.ReLU(),
       nn.Dropout2d()
-    ).to(device)
+    )
     nn.init.xavier_normal_(self.fc7[0].weight)
 
     # fc before upsample : to class_n
-    self.score_pool3 = nn.Conv2d(256, class_n, kernel_size=1).to(device)
+    self.score_pool3 = nn.Conv2d(256, class_n, kernel_size=1)
     nn.init.xavier_normal_(self.score_pool3.weight)
 
-    self.score_pool4 = nn.Conv2d(512, class_n, kernel_size=1).to(device)
+    self.score_pool4 = nn.Conv2d(512, class_n, kernel_size=1)
     nn.init.xavier_normal_(self.score_pool4.weight)
 
-    self.score_final = nn.Conv2d(4096, class_n, kernel_size=1).to(device)
+    self.score_final = nn.Conv2d(4096, class_n, kernel_size=1)
     nn.init.xavier_normal_(self.score_final.weight)
     
     # stride s, padding s/2, kernelsize 2s -> 2 times upsampling for images
-    self.upsample_make_16s = nn.ConvTranspose2d(class_n, class_n, kernel_size=4, stride=2, bias=False).to(device) # to 1/16 padding=1,
-    self.upsample_make_16s.weight.data.copy_(bilinear_kernel_init(class_n, class_n, 4, device))
+    self.upsample_make_16s = nn.ConvTranspose2d(class_n, class_n, kernel_size=4, stride=2, bias=False) # to 1/16 padding=1,
+    self.upsample_make_16s.weight.data.copy_(bilinear_kernel_init(class_n, class_n, 4))
 
-    self.upsample_make_8s = nn.ConvTranspose2d(class_n, class_n, kernel_size=4,  stride=2, bias=False).to(device) # to 1/8 padding=1,
-    self.upsample_make_8s.weight.data.copy_(bilinear_kernel_init(class_n, class_n, 4, device))
+    self.upsample_make_8s = nn.ConvTranspose2d(class_n, class_n, kernel_size=4,  stride=2, bias=False) # to 1/8 padding=1,
+    self.upsample_make_8s.weight.data.copy_(bilinear_kernel_init(class_n, class_n, 4))
     
-    self.upsample_to_score = nn.ConvTranspose2d(class_n, class_n, kernel_size=16,  stride=8, bias=False).to(device) # to 1 padding=4,
-    self.upsample_to_score.weight.data.copy_(bilinear_kernel_init(class_n, class_n, 16, device))
+    self.upsample_to_score = nn.ConvTranspose2d(class_n, class_n, kernel_size=16,  stride=8, bias=False) # to 1 padding=4,
+    self.upsample_to_score.weight.data.copy_(bilinear_kernel_init(class_n, class_n, 16))
 
   def crop_(self, crop_obj, base_obj, crop=True):
       if crop:
           c = (crop_obj.size()[2] - base_obj.size()[2]) // 2
-          crop_obj = crop_obj[:,:,c:c+base_obj.shape[2],c:c+base_obj.shape[3]]
+          crop_obj_out = crop_obj[:,:,c:c+base_obj.shape[2],c:c+base_obj.shape[3]]
           # crop_obj = F.pad(crop_obj, (-c, -c, -c, -c))
           # crop_obj = torchvision.transforms.CenterCrop((base_obj.shape[2], base_obj.shape[3]))
-      return crop_obj
+      return crop_obj_out
 
   def forward(self, x):
     input_x = x.clone()
-    # print("input shape : ", x.shape)
     
-    x = self.downsample1(x) # 1/2
-    x = self.downsample2(x) # 1/4
-    x = self.downsample3(x) # 1/8
-    pool3 = x
-    x = self.downsample4(x) # 1/16
-    pool4 = x
-    x = self.downsample5(x) # 1/32
+    h = x
+    h = self.downsample1(h) # 1/2
+    h = self.downsample2(h) # 1/4
+    h = self.downsample3(h) # 1/8
+    pool3 = h
+    h = self.downsample4(h) # 1/16
+    pool4 = h
+    h = self.downsample5(h) # 1/32
 
-    x = self.fc6(x) # 1/32
-    x = self.fc7(x) # 1/32
+    h = self.fc6(h) # 1/32
+    h = self.fc7(h) # 1/32
 
-    x = self.score_final(x)
-    x = self.upsample_make_16s(x)
-    score_fc_16s = x # 1/16
+    h = self.score_final(h)
+    h = self.upsample_make_16s(h)
+    score_fc_16s = h # 1/16
 
-    x = self.score_pool4(pool4) # 1/16 
-    x = self.crop_(x, score_fc_16s)
-    score_pool4c = x # 1/16
+    h = self.score_pool4(pool4) # 1/16 
+    h = self.crop_(h, score_fc_16s)
+    score_pool4c = h # 1/16
 
-    x = score_fc_16s + score_pool4c # 1/16
-    x = self.upsample_make_8s(x)
-    score_fc_8s = x # 1/8
+    h = score_fc_16s + score_pool4c # 1/16
+    h = self.upsample_make_8s(h)
+    score_fc_8s = h # 1/8
 
-    x = self.score_pool3(pool3)
-    x = self.crop_(x, score_fc_8s)
-    score_pool3c = x # 1/8
+    h = self.score_pool3(pool3)
+    h = self.crop_(h, score_fc_8s)
+    score_pool3c = h # 1/8
 
-    x = score_fc_8s + score_pool3c # 1/8
-    x = self.upsample_to_score(x)
-    x = self.crop_(x, input_x)
+    h = score_fc_8s + score_pool3c # 1/8
+    h = self.upsample_to_score(h)
+    h = self.crop_(h, input_x)
 
-    out = x
-    # print("out shape : ", out.shape)
+    out = h
     return out
+
+  def copy_params_from_vgg16(self, vgg16):
+    print("weight copy started...")
+
+    features = [
+      self.downsample1[0], self.downsample1[1],
+      self.downsample1[2], self.downsample1[3],
+      self.downsample1[4], 
+      self.downsample2[0], self.downsample2[1],
+      self.downsample2[2], self.downsample2[3],
+      self.downsample2[4], 
+      self.downsample3[0], self.downsample3[1],
+      self.downsample3[2], self.downsample3[3],
+      self.downsample3[4], self.downsample3[5], 
+      self.downsample3[6], 
+      self.downsample4[0], self.downsample4[1],
+      self.downsample4[2], self.downsample4[3],
+      self.downsample4[4], self.downsample4[5], 
+      self.downsample4[6], 
+      self.downsample5[0], self.downsample5[1],
+      self.downsample5[2], self.downsample5[3],
+      self.downsample5[4], self.downsample5[5], 
+      self.downsample5[6]
+    ]
+    for l1, l2 in zip(vgg16.features, features):
+      if isinstance(l1, nn.Conv2d) and isinstance(l2, nn.Conv2d):
+        assert l1.weight.size() == l2.weight.size()
+        assert l1.bias.size() == l2.bias.size()
+        l2.weight.data.copy_(l1.weight.data)
+        l2.bias.data.copy_(l1.bias.data)
+    for i, name in zip([0, 3], ['fc6', 'fc7']):
+      l1 = vgg16.classifier[i]
+      l2 = getattr(self, name)
+      l2[0].weight.data.copy_(l1.weight.data.view(l2[0].weight.size()))
+      l2[0].bias.data.copy_(l1.bias.data.view(l2[0].bias.size()))
+
+    print("weight copy end")

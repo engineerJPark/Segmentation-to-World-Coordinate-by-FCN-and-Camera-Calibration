@@ -38,29 +38,30 @@ def label_accuracy_score(val_model, n_class, device='cpu', verbose=True):
   val_data = VOCClassSegBase(root=ROOT_DIR, split='val', transform_tf=True)
   val_data_loader = DataLoader(dataset=val_data, batch_size = 1, drop_last=True)
   
-  hist = torch.zeros((n_class, n_class)).to(device)
+  with torch.no_grad():
+    hist = torch.zeros((n_class, n_class)).to(device)
 
-  # model prediction
-  for iter, (label_preds, label_trues) in enumerate(val_data_loader):
+    # model prediction
+    for iter, (label_preds, label_trues) in enumerate(val_data_loader):
 
-    label_preds = label_preds.to(device)
-    label_trues = label_trues.squeeze(dim=0).squeeze(dim=0).to(device)
-    
-    label_seg = val_model(label_preds) # 1CHW
-    label_seg = torch.squeeze(label_seg, dim=0) # CHW
-    label_preds = torch.argmax(label_seg, dim=0) # HW
-    hist += _fast_hist(label_trues.flatten(), label_preds.flatten(), n_class, device=device)
+      label_preds = label_preds.to(device)
+      label_trues = label_trues.squeeze(dim=0).squeeze(dim=0).to(device)
+      
+      label_seg = val_model(label_preds) # 1CHW
+      label_seg = torch.squeeze(label_seg, dim=0) # CHW
+      label_preds = torch.argmax(label_seg, dim=0) # HW
+      hist += _fast_hist(label_trues.flatten(), label_preds.flatten(), n_class, device=device)
 
 
-  acc = torch.diag(hist).sum() / hist.sum()
-  acc_cls = torch.diag(hist) / hist.sum(dim=1)
-  acc_cls = torch.nanmean(acc_cls)
-  iu = torch.diag(hist) / (
-      hist.sum(dim=1) + hist.sum(dim=0) - torch.diag(hist)
-  )
-  mean_iu = torch.nanmean(iu)
-  freq = hist.sum(dim=1) / hist.sum()
-  fwavacc = (freq[freq > 0] * iu[freq > 0]).sum()
+    acc = torch.diag(hist).sum() / hist.sum()
+    acc_cls = torch.diag(hist) / hist.sum(dim=1)
+    acc_cls = torch.nanmean(acc_cls)
+    iu = torch.diag(hist) / (
+        hist.sum(dim=1) + hist.sum(dim=0) - torch.diag(hist)
+    )
+    mean_iu = torch.nanmean(iu)
+    freq = hist.sum(dim=1) / hist.sum()
+    fwavacc = (freq[freq > 0] * iu[freq > 0]).sum()
 
   if verbose == True:
     print("acc : ", acc.item())
