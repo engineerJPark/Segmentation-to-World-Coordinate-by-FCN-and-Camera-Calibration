@@ -51,13 +51,13 @@ def train(model, optimizer, criterion, scheduler=None, epochs=300, device='cpu',
                   'epoch': epoch + 1,
                   'model_state_dict': model.state_dict(),
                   'optimizer_state_dict': optimizer.state_dict(),
-                  'scheduler_state_dict': scheduler.state_dict(),
+                  # 'scheduler_state_dict': scheduler.state_dict(),
                   'loss': total_loss
                   }, PATH)
       last_loss = total_loss
 
-    if scheduler is not None:
-      scheduler.step()
+    # if scheduler is not None:
+    #   scheduler.step()
   
   print("Training End")
   return loss_history
