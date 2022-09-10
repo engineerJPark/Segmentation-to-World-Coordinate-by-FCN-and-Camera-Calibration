@@ -33,7 +33,7 @@ if __name__ == '__main__':
   # print("past_epoch : ", past_epoch)
   
   epochs = 300
-  lr = 1e-4
+  lr = 1e-10
   weight_decay = 5e-4
   momentum = 0.99
   
