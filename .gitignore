@@ -159,10 +159,17 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
+deprecated/
+
 src/dataset
 src/models
+
 voc_train/voc_data/
 voc_train/fcn_model/
 voc_train/segmentation_plot.jpg
 voc_train/loss_history.jpg
-deprecated/
+
+realword_train/dataset
+realword_train/fcn_model/
+realword_train/segmentation_plot.jpg
+realword_train/loss_history.jpg
