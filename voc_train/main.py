@@ -25,14 +25,14 @@ if __name__ == '__main__':
   model = FCN18(21)
   model.copy_params_from_vgg16(vgg16(weights=VGG16_Weights.DEFAULT))
 
-  # # resume training
-  # PATH = 'voc_train/fcn_model/model_97_1729_130'
-  # checkpoint = torch.load(PATH)
-  # model.load_state_dict(checkpoint['model_state_dict'])
+  # resume training
+  PATH = 'voc_train/fcn_model/model_9_10_19_43_205'
+  checkpoint = torch.load(PATH)
+  model.load_state_dict(checkpoint['model_state_dict'])
   # past_epoch = checkpoint['epoch']
   # print("past_epoch : ", past_epoch)
   
-  epochs = 300
+  epochs = 305 - 205
   lr = 1e-10
   weight_decay = 5e-4
   momentum = 0.99

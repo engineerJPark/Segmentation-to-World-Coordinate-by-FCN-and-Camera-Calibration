@@ -10,7 +10,7 @@ import numpy as np
 class camera_node():
     def __init__(self):
         self.bridge = CvBridge()
-        self.predictor = predict_coord('./models/model_8_17_7_31_29')
+        self.predictor = predict_coord('../js_ws/src/models/model_8_17_7_31_29')
 
     def get_img(self, searching_class, class_n = 4, visualize = False, verbose = False):
         '''
