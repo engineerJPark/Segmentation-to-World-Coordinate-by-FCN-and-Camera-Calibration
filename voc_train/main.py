@@ -26,6 +26,7 @@ if __name__ == '__main__':
   model.copy_params_from_vgg16(vgg16(weights=VGG16_Weights.DEFAULT))
 
   # resume training
+  print("resume training ... ")
   PATH = 'voc_train/fcn_model/model_9_11_5_51_100'
   checkpoint = torch.load(PATH)
   model.load_state_dict(checkpoint['model_state_dict'])

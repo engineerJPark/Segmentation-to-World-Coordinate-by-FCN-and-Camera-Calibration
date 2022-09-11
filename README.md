@@ -29,9 +29,11 @@ cd src
 python3 cam.py
 ```
 
-# mean IoU
+# Result of Metric
 
-
+- test on PASCAL VOC 2012 validation set
+- Accuracy : 88%
+- Mean IoU : 42%
 
 # Reference for this repo
 

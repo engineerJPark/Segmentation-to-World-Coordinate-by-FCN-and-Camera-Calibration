@@ -3,8 +3,6 @@ from data import VOCClassSegBase
 from torch.utils.data import DataLoader
 import torch
 import datetime
-from utils import label_accuracy_score
-
 
 def train(model, optimizer, criterion, scheduler=None, epochs=300, device='cpu', verbose=False):
   ROOT_DIR = 'voc_train/voc_data/'
