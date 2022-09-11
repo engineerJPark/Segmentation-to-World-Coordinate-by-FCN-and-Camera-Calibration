@@ -163,4 +163,6 @@ src/dataset
 src/models
 voc_train/voc_data/
 voc_train/fcn_model/
+voc_train/segmentation_plot.jpg
+voc_train/loss_history.jpg
 deprecated/
