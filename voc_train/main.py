@@ -5,7 +5,7 @@ check whether iou, pix acc is not wrong to control the voc data.
 
 from train import train
 from fcn import FCN18
-from utils import label_accuracy_score
+from utils import label_accuracy_score, seg_plot
 
 import torch
 import torch.nn as nn
@@ -26,13 +26,11 @@ if __name__ == '__main__':
   model.copy_params_from_vgg16(vgg16(weights=VGG16_Weights.DEFAULT))
 
   # resume training
-  PATH = 'voc_train/fcn_model/model_9_10_19_43_205'
+  PATH = 'voc_train/fcn_model/model_9_11_5_51_100'
   checkpoint = torch.load(PATH)
   model.load_state_dict(checkpoint['model_state_dict'])
-  # past_epoch = checkpoint['epoch']
-  # print("past_epoch : ", past_epoch)
   
-  epochs = 305 - 205
+  epochs = 300
   lr = 1e-10
   weight_decay = 5e-4
   momentum = 0.99
@@ -49,3 +47,5 @@ if __name__ == '__main__':
   plt.savefig('voc_train/loss_history.jpg')
 
   acc, acc_cls, mean_iu, fwavacc = label_accuracy_score(model, 21, device=device, verbose=True)
+  
+  seg_plot(model, 500, device=device)

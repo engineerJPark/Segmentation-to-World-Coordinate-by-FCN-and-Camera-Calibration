@@ -69,6 +69,8 @@ def label_accuracy_score(val_model, n_class, device='cpu', verbose=True):
     print("acc_cls : ", acc_cls.item())
     print("mean_iu : ", mean_iu.item())
     print("fwavacc : ", fwavacc.item())
+
+  print('model evaluation : metric mode ended')
   return acc, acc_cls, mean_iu, fwavacc
 
 def seg_plot(val_model, idx, device='cpu'):
@@ -110,3 +112,5 @@ def seg_plot(val_model, idx, device='cpu'):
   plt.imshow(val_img_pil)
   plt.show()
   plt.savefig('voc_train/segmentation_plot.jpg')
+
+print('model evaluation : plot mode ended')
