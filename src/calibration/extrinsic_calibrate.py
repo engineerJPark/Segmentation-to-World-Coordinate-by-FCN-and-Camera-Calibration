@@ -2,6 +2,8 @@
 from
 https://foss4g.tistory.com/1665
 with some editing
+
+쓰레기
 '''
 
 import cv2

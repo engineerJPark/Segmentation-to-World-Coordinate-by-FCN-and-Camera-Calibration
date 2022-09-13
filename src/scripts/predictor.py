@@ -12,9 +12,9 @@ import open3d as o3d
 SEG_CLASS_NAMES = ['bg','roll','sauce','snack']
 
 class predictor():
-  def __init__(self, path):
+  def __init__(self, path, device= 'cpu'):
     self.path = path
-    self.device= 'cuda'
+    self.device= device
     self.model = FCN18(4).to(self.device)
 
     checkpoint = torch.load(self.path)
@@ -101,15 +101,32 @@ class predict_coord(predictor):
     # by cv2.calibrateCamera
     self.intrinsic = o3d.camera.PinholeCameraIntrinsic()
 
-    self.intrinsic.intrinsic_matrix = np.array([[603.41800487, 0., 309.84725778],
-                                                [0., 601.83136706, 263.58976281],
-                                                [0., 0., 1. ]])
-    r_mat = np.array([[ 0.0212196 , -0.99974909, -0.00717518],
-                      [-0.65538637, -0.00849014, -0.75524606],
-                      [ 0.75499565,  0.02072853, -0.65540209]])
-    c_mat = np.array([[-0.30],
-                      [0],
-                      [0.38]])
+    # self.intrinsic.intrinsic_matrix = np.array(
+    #   [[512.10704929, 0., 320.], # theoritical value
+    #   [0., 641.90915854, 240.],
+    #   [0., 0., 1. ]]
+    # )
+
+    self.intrinsic.intrinsic_matrix = np.array(
+      [[646.22925621,   0.,         299.50901429],
+      [  0.,         611.69551895, 207.93689654],
+      [  0.,           0.,           1.        ]]
+    )
+
+    # self.intrinsic.intrinsic_matrix = np.array([[622.90389931, 0., 325.17697045], 
+    #                                             [0., 623.36739775, 250.94119723],
+    #                                             [0., 0., 1. ]])
+
+    r_mat = np.array(
+      [[ 0.02181321, -0.99942881, -0.02581159],
+       [-0.40214857,  0.01486566, -0.91545373],
+       [ 0.91531454,  0.03034908, -0.4015946 ]]
+    )
+
+    c_mat = np.array([[-0.4], # 매니퓰레이터 원점에서부터 realsense 렌즈 중앙까지 직접 자로 측정(m) 46.5 5 37.5
+                      [0.031],
+                      [0.37]])
+                      
     t_mat = -np.matmul(r_mat, c_mat)
     
     # extrinsic matrix define
@@ -121,7 +138,7 @@ class predict_coord(predictor):
   def get_pointcloud(self, rgbd_image):
 
     pcd = self.init_pointcloud.create_from_rgbd_image(rgbd_image, intrinsic=self.intrinsic, extrinsic=self.extrinsic_mat, project_valid_depth_only=True)
-    pcd.transform([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]) # flip
+    pcd.transform([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]) # flip
     
     # height regularizer
     pcd_points = np.asarray(pcd.points)

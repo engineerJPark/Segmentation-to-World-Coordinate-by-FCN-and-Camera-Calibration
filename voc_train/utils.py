@@ -111,6 +111,6 @@ def seg_plot(val_model, idx, device='cpu'):
   plt.subplot(1,2,2)
   plt.imshow(val_img_pil)
   plt.show()
-  plt.savefig('voc_train/segmentation_plot.jpg')
+  plt.savefig('voc_train/segmentation_plot.png')
 
-print('model evaluation : plot mode ended')
+  print('model evaluation : plot mode ended')

@@ -41,3 +41,15 @@ python3 cam.py
     - [Link](https://learnopencv.com/camera-calibration-using-opencv/)
 - Extrinsic camera calibration
     - [Link](https://foss4g.tistory.com/1665)
+
+# Demo Videos
+
+- on Youtube
+  - [On Robot](https://youtu.be/znpJGxREoVE)
+  - [On Screen 1](https://youtu.be/dAixFD9XThM)
+  - [On Screen 2](https://youtu.be/-ozK8xmS2pE)
+  - [On Screen 3](https://youtu.be/TB8IPLbE2zM)
+
+[OnRobot](demo/OnRobot.gif)
+[OnScreen1](demo/OnScreen1.gif)
+[OnScreen2](demo/OnScreen2.gif)

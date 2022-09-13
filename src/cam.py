@@ -24,17 +24,24 @@ class camera_node():
         '''
         get rgb, depth, segmentation image
         '''
+        print("getting image from realsense")
         data = rospy.wait_for_message('/camera/color/image_raw',Image)
-        data2 = rospy.wait_for_message('/camera/aligned_depth_to_color/image_raw',Image)   
+        data2 = rospy.wait_for_message('/camera/aligned_depth_to_color/image_raw',Image)
         
         self.cv_image = self.bridge.imgmsg_to_cv2(data,"bgr8")
         self.cv_image_depth = self.bridge.imgmsg_to_cv2(data2,"32FC1") # original depth unit is milimeter
+
+        # for test 
+        print("cv_image.shape : ", self.cv_image.shape)
+        print("cv_image_depth.shape : ", self.cv_image_depth.shape)
+
         self.image_mask, self.rgbd_image_list = self.predictor.predict_seg(self.cv_image, self.cv_image_depth)
 
     def segmentation_to_pointcloud(self, searching_class = -1, class_n = 4):
         '''
         get pointcloud and center point
         '''
+        self.get_rgb_depth_segmentation()
         self.pcd = []
         for i in range(class_n - 1):
             self.pcd.append(self.predictor.get_pointcloud(self.rgbd_image_list[i]))
@@ -124,7 +131,6 @@ if __name__ == '__main__':
         print("try again, I only get integer.")
     
     while not rospy.is_shutdown():
-        cam.get_rgb_depth_segmentation()
         pcd_dict = cam.segmentation_to_pointcloud(searching_class = idx, class_n = 4)
         rgb_img, depth_img, image_mask = cam.visualize()
 

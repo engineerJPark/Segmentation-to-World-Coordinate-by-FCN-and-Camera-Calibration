@@ -27,10 +27,10 @@ objp[0,:,:2] = np.mgrid[0:CHECKERBOARD[0], 0:CHECKERBOARD[1]].T.reshape(-1, 2)
 objp = objp * 2
 objp[0, :, 1] = objp[0, :, 1] * (-1)
 
-print(objp) ###########
+# print(objp) ###########
 
 # Extracting path of individual image stored in a given directory
-images = glob.glob('src/dataset/calibration/*.jpg')
+images = glob.glob('./dataset/calibration/*.jpg')
 images.sort()
 print(images)
 
@@ -83,4 +83,5 @@ print("tvecs : \n")
 print(tvecs)
 
 R = cv2.Rodrigues(rvecs[-1])
+print("R: \n")
 print(R)

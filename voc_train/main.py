@@ -45,7 +45,7 @@ if __name__ == '__main__':
   print(loss_history)
   plt.plot(loss_history)
   plt.show()
-  plt.savefig('voc_train/loss_history.jpg')
+  plt.savefig('voc_train/loss_history.png')
 
   acc, acc_cls, mean_iu, fwavacc = label_accuracy_score(model, 21, device=device, verbose=True)
   
