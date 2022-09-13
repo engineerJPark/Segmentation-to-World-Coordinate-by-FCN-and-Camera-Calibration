@@ -16,7 +16,6 @@ def train(model, optimizer, criterion, scheduler=None, epochs=300, device='cpu',
   model.train()
   print('train mode start')
 
-  # memory 누수
   for epoch in range(epochs):
     
     total_loss = 0

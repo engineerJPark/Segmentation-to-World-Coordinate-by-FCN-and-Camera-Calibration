@@ -27,7 +27,7 @@ if __name__ == '__main__':
 
   # resume training
   print("resume training ... ")
-  PATH = 'voc_train/fcn_model/model_9_11_5_51_100'
+  PATH = 'voc_train/fcn_model/model_9_11_18_55_70'
   checkpoint = torch.load(PATH)
   model.load_state_dict(checkpoint['model_state_dict'])
   
@@ -45,7 +45,7 @@ if __name__ == '__main__':
   print(loss_history)
   plt.plot(loss_history)
   plt.show()
-  plt.savefig('voc_train/loss_history.jpg')
+  plt.savefig('voc_train/loss_history.png')
 
   acc, acc_cls, mean_iu, fwavacc = label_accuracy_score(model, 21, device=device, verbose=True)
   

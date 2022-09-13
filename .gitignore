@@ -160,15 +160,12 @@ cython_debug/
 #.idea/
 
 deprecated/
-
 src/dataset
 src/models
-
 voc_train/voc_data/
 voc_train/fcn_model/
 voc_train/segmentation_plot.png
 voc_train/loss_history.jpg
-
 realword_train/dataset/
 realword_train/fcn_model/
 realword_train/segmentation_plot.png
