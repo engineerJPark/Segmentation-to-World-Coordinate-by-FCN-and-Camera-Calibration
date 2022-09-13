@@ -35,8 +35,8 @@ def label_accuracy_score(val_model, n_class, device='cpu', verbose=True):
   print('model evaluation : metric mode start')
 
   # for test data
-  ROOT_DIR = 'voc_train/voc_data/'
-  val_data = VOCClassSegBase(root=ROOT_DIR, split='val', transform_tf=True)
+  ROOT_DIR = 'realworld'
+  val_data = VOCClassSegBase(root=ROOT_DIR, transform_tf=True)
   val_data_loader = DataLoader(dataset=val_data, batch_size = 1, drop_last=True)
   
   with torch.no_grad():
@@ -84,8 +84,8 @@ def seg_plot(val_model, idx, device='cpu'):
   val_model.eval()
   print('model evaluation : plot mode start')
 
-  ROOT_DIR = 'voc_train/voc_data/'
-  val_data = VOCClassSegBase(root=ROOT_DIR, split='val', transform_tf=True)
+  ROOT_DIR = 'realworld'
+  val_data = VOCClassSegBase(root=ROOT_DIR, transform_tf=True)
   val_data_loader = DataLoader(dataset=val_data, batch_size = 1, drop_last=True)
 
   for iter, (val_img, val_gt_img) in enumerate(val_data_loader):

@@ -22,7 +22,6 @@ class VOCClassSegBase(torch.utils.data.Dataset):
   # def __init__(self, root='realworld', split='train', transform_tf=True):
   def __init__(self, root='realworld', transform_tf=True):
       self.root = root
-      self.split = split
       self.transform_tf = transform_tf
       self.transform = transforms.Compose([
           transforms.Normalize(mean=(0, 0, 0), std=(255., 255., 255.)),

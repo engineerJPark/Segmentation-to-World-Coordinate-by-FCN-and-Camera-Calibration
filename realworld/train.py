@@ -5,7 +5,7 @@ import torch
 import datetime
 
 def train(model, optimizer, criterion, scheduler=None, epochs=300, device='cpu', verbose=False):
-  ROOT_DIR = 'voc_train/voc_data/'
+  ROOT_DIR = 'realworld'
   train_data = VOCClassSegBase(root=ROOT_DIR, transform_tf=True)
   train_data_loader = DataLoader(dataset=train_data, batch_size = 1, drop_last=True)
 
@@ -43,7 +43,7 @@ def train(model, optimizer, criterion, scheduler=None, epochs=300, device='cpu',
     
     if (epoch + 1) % 5 == 0 and last_loss > loss:
       now = datetime.datetime.now()
-      PATH = "voc_train/fcn_model/model_%d_%d_%d_%d_%d" % (now.month, now.day, now.hour, now.minute, epoch + 1)
+      PATH = "realworld/fcn_model/model_%d_%d_%d_%d_%d" % (now.month, now.day, now.hour, now.minute, epoch + 1)
       torch.save({
                   'epoch': epoch + 1,
                   'model_state_dict': model.state_dict(),
