@@ -166,7 +166,7 @@ voc_train/voc_data
 voc_train/fcn_model
 voc_train/segmentation_plot.png
 voc_train/loss_history.jpg
-
+realword/dataset
 realword/fcn_model
 realword/segmentation_plot.png
 realword/loss_history.jpg
