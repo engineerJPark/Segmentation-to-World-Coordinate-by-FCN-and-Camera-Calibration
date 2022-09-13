@@ -50,6 +50,6 @@ python3 cam.py
   - [On Screen 2](https://youtu.be/-ozK8xmS2pE)
   - [On Screen 3](https://youtu.be/TB8IPLbE2zM)
 
-[OnRobot](demo/OnRobot.gif)
-[OnScreen1](demo/OnScreen1.gif)
-[OnScreen2](demo/OnScreen2.gif)
+![Image](demo/OnRobot.gif)
+![Image](demo/OnScreen1.gif)
+![Image](demo/OnScreen2.gif)
