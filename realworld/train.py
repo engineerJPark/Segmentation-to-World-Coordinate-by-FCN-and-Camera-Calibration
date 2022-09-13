@@ -6,7 +6,7 @@ import datetime
 
 def train(model, optimizer, criterion, scheduler=None, epochs=300, device='cpu', verbose=False):
   ROOT_DIR = 'voc_train/voc_data/'
-  train_data = VOCClassSegBase(root=ROOT_DIR, split='train', transform_tf=True)
+  train_data = VOCClassSegBase(root=ROOT_DIR, transform_tf=True)
   train_data_loader = DataLoader(dataset=train_data, batch_size = 1, drop_last=True)
 
   loss_history = []
