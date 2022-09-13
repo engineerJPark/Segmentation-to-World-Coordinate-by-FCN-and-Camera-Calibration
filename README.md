@@ -32,8 +32,8 @@ python3 cam.py
 # Result of Metric
 
 - test on PASCAL VOC 2012 validation set
-- Accuracy : 88%
-- Mean IoU : 42%
+  - Accuracy : 86.19%
+  - Mean IoU : 42.30%
 
 # Reference for this repo
 

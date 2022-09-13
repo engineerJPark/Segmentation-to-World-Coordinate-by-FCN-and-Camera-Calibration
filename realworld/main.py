@@ -12,6 +12,8 @@ import torch.nn as nn
 import torch.optim as optim
 from torchvision.models import vgg16, VGG16_Weights
 import matplotlib.pyplot as plt
+import copy
+import collections
 
 if __name__ == '__main__': 
   if torch.cuda.is_available():
@@ -22,18 +24,26 @@ if __name__ == '__main__':
     torch.manual_seed(1)
   print(torch.__version__, device)
 
-  model = FCN18(21)
-  model.copy_params_from_vgg16(vgg16(weights=VGG16_Weights.DEFAULT))
+  model = FCN18(4)
 
   # resume training
   print("resume training ... ")
   PATH = 'voc_train/fcn_model/model_9_11_18_55_70'
   checkpoint = torch.load(PATH)
-  model.load_state_dict(checkpoint['model_state_dict'])
+  state_dict = checkpoint['model_state_dict']
+  new_state_dict = collections.OrderedDict()
+
+  # voc pretrained to realworld
+  with torch.no_grad():
+    for key in state_dict:
+      if key.split('.')[0][:-1] == 'downsample' \
+        or key.split('.')[0][:-1] == 'fc':
+        new_state_dict[key] = copy.deepcopy(state_dict[key])
+  model.load_state_dict(new_state_dict, strict=False)
   
-  epochs = 200
-  lr = 1e-14
-  weight_decay = 5e-4
+  epochs = 300
+  lr = 1e-10
+  weight_decay = 1e-5
   momentum = 0.99
   
   optimizer = optim.SGD(model.parameters(), lr=lr, momentum=momentum, weight_decay=weight_decay)
