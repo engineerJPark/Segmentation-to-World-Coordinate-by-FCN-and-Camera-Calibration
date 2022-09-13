@@ -173,7 +173,7 @@ voc_train/segmentation_plot.png
 voc_train/loss_history.jpg
 
 # realworld folder
-realword/dataset
-realword/fcn_model
-realword/segmentation_plot.png
-realword/loss_history.jpg
+realworld/real_dataset
+realworld/fcn_model
+realworld/segmentation_plot.png
+realworld/loss_history.jpg
