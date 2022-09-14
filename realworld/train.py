@@ -53,8 +53,8 @@ def train(model, optimizer, criterion, scheduler=None, epochs=300, device='cpu',
                   }, PATH)
       last_loss = total_loss
 
-    # if scheduler is not None:
-    #   scheduler.step()
+    if scheduler is not None:
+      scheduler.step()
   
   print("Training End")
   return loss_history

@@ -41,14 +41,15 @@ if __name__ == '__main__':
         new_state_dict[key] = copy.deepcopy(state_dict[key])
   model.load_state_dict(new_state_dict, strict=False)
   
-  epochs = 300
-  lr = 1e-10
+  epochs = 600
+  lr = 1e-4
   weight_decay = 1e-5
   momentum = 0.99
   
   optimizer = optim.SGD(model.parameters(), lr=lr, momentum=momentum, weight_decay=weight_decay)
   criterion = nn.CrossEntropyLoss(ignore_index=-1).to(device)
-  scheduler = None
+  scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=200, gamma=0.1)
+  # scheduler = None
 
   # train
   loss_history= train(model, optimizer, criterion, scheduler, epochs = epochs, device=device)
