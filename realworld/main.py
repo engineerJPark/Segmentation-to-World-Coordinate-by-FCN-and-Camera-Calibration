@@ -39,6 +39,8 @@ if __name__ == '__main__':
         or key.split('.')[0][:-1] == 'fc':
         new_state_dict[key] = copy.deepcopy(state_dict[key])
   model.load_state_dict(new_state_dict, strict=False)
+
+  del checkpoint, state_dict, new_state_dict
   
   epochs = 600
   lr = 1e-4
