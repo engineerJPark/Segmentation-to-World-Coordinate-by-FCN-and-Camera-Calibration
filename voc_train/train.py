@@ -33,7 +33,7 @@ def train(model, optimizer, criterion, scheduler=None, epochs=300, device='cpu',
       loss = criterion(score_img, train_gt_img)
       loss.backward()
       optimizer.step()
-      total_loss += loss.data
+      total_loss += float(loss)
     total_loss /= len(train_data_loader)
 
     print('====================================')

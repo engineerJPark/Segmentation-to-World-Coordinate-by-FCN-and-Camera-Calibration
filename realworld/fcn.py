@@ -104,6 +104,7 @@ class FCN18(nn.Module):
       return crop_obj_out
 
   def forward(self, x):
+    # print(x.shape)
     input_x = x.clone()
     
     h = x

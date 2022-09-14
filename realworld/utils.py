@@ -1,5 +1,5 @@
 from torch.utils.data import DataLoader
-from data import VOCClassSegBase
+from data import RealClassSegBase
 import torch
 import numpy as np
 
@@ -36,7 +36,7 @@ def label_accuracy_score(val_model, n_class, device='cpu', verbose=True):
 
   # for test data
   ROOT_DIR = 'realworld'
-  val_data = VOCClassSegBase(root=ROOT_DIR, transform_tf=True)
+  val_data = RealClassSegBase(root=ROOT_DIR, transform_tf=True)
   val_data_loader = DataLoader(dataset=val_data, batch_size = 1, drop_last=True)
   
   with torch.no_grad():
@@ -85,7 +85,7 @@ def seg_plot(val_model, idx, device='cpu'):
   print('model evaluation : plot mode start')
 
   ROOT_DIR = 'realworld'
-  val_data = VOCClassSegBase(root=ROOT_DIR, transform_tf=True)
+  val_data = RealClassSegBase(root=ROOT_DIR, transform_tf=True)
   val_data_loader = DataLoader(dataset=val_data, batch_size = 1, drop_last=True)
 
   for iter, (val_img, val_gt_img) in enumerate(val_data_loader):

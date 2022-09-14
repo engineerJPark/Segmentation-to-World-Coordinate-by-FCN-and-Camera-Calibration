@@ -32,7 +32,6 @@ if __name__ == '__main__':
   checkpoint = torch.load(PATH)
   state_dict = checkpoint['model_state_dict']
   new_state_dict = collections.OrderedDict()
-
   # voc pretrained to realworld
   with torch.no_grad():
     for key in state_dict:
@@ -48,8 +47,8 @@ if __name__ == '__main__':
   
   optimizer = optim.SGD(model.parameters(), lr=lr, momentum=momentum, weight_decay=weight_decay)
   criterion = nn.CrossEntropyLoss(ignore_index=-1).to(device)
-  scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=200, gamma=0.1)
-  # scheduler = None
+  # scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=200, gamma=0.1)
+  scheduler = None
 
   # train
   loss_history= train(model, optimizer, criterion, scheduler, epochs = epochs, device=device)
