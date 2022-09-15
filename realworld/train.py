@@ -20,7 +20,7 @@ def train(model, optimizer, criterion, scheduler=None, epochs=300, device='cpu',
     
     total_loss = 0
     for iter, (train_img, train_gt_img) in enumerate(train_data_loader):
-      print("iter : %d" % (iter + 1))
+      # print("iter : %d" % (iter + 1))
 
       # prediction
       train_img = model(train_img.to(device)).permute(0,2,3,1)
@@ -55,3 +55,4 @@ def train(model, optimizer, criterion, scheduler=None, epochs=300, device='cpu',
   
   print("Training End")
   return loss_history
+  

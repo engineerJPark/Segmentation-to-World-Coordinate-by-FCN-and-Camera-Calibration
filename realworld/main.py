@@ -28,21 +28,21 @@ if __name__ == '__main__':
 
   # resume training
   print("resume training ... ")
-  PATH = 'voc_train/fcn_model/model_9_12_13_46_200'
+  PATH = 'realworld/fcn_model/model_9_15_1_50_100'
   checkpoint = torch.load(PATH)
   state_dict = checkpoint['model_state_dict']
   new_state_dict = collections.OrderedDict()
-  # voc pretrained to realworld
-  with torch.no_grad():
-    for key in state_dict:
-      if key.split('.')[0][:-1] == 'downsample' \
-        or key.split('.')[0][:-1] == 'fc':
-        new_state_dict[key] = copy.deepcopy(state_dict[key])
-  model.load_state_dict(new_state_dict, strict=False)
+  # # voc pretrained to realworld
+  # with torch.no_grad():
+  #   for key in state_dict:
+  #     if key.split('.')[0][:-1] == 'downsample' \
+  #       or key.split('.')[0][:-1] == 'fc':
+  #       new_state_dict[key] = copy.deepcopy(state_dict[key])
+  # model.load_state_dict(new_state_dict, strict=False)
 
   del checkpoint, state_dict, new_state_dict
   
-  epochs = 600
+  epochs = 100
   lr = 1e-4
   weight_decay = 1e-5
   momentum = 0.99
@@ -62,3 +62,4 @@ if __name__ == '__main__':
   acc, acc_cls, mean_iu, fwavacc = label_accuracy_score(model, 4, device=device, verbose=True)
   
   seg_plot(model, 500, device=device)
+  
