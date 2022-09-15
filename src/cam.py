@@ -16,7 +16,7 @@ class camera_node():
     2 : roll
     3 : snack
     '''
-    def __init__(self,path = '../js_ws/src/models/model_8_17_7_31_29'):
+    def __init__(self, path = '../js_ws/src/models/model_9_15_20_26_100'):
         self.bridge = CvBridge()
         self.predictor = predict_coord(path)
     
@@ -115,7 +115,7 @@ if __name__ == '__main__':
     # Ignore warnings in obj loader
     o3d.utility.set_verbosity_level(o3d.utility.VerbosityLevel.Error)
     
-    cam = camera_node('models/model_8_17_7_31_29')
+    cam = camera_node('models/model_9_15_20_26_100')
     rospy.init_node("segmentation_to_world")
 
     iter = 1
