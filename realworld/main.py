@@ -30,9 +30,11 @@ if __name__ == '__main__':
   print("resume training ... ")
   PATH = 'realworld/fcn_model/model_9_15_1_50_100'
   checkpoint = torch.load(PATH)
-  state_dict = checkpoint['model_state_dict']
-  new_state_dict = collections.OrderedDict()
+  model.load_state_dict(checkpoint['model_state_dict'])
+
   # # voc pretrained to realworld
+  # state_dict = checkpoint['model_state_dict']
+  # new_state_dict = collections.OrderedDict()
   # with torch.no_grad():
   #   for key in state_dict:
   #     if key.split('.')[0][:-1] == 'downsample' \
@@ -40,7 +42,7 @@ if __name__ == '__main__':
   #       new_state_dict[key] = copy.deepcopy(state_dict[key])
   # model.load_state_dict(new_state_dict, strict=False)
 
-  del checkpoint, state_dict, new_state_dict
+  del checkpoint
   
   epochs = 100
   lr = 1e-4
