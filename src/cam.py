@@ -16,26 +16,37 @@ class camera_node():
     2 : roll
     3 : snack
     '''
-    def __init__(self, path = '../js_ws/src/models/model_9_15_20_26_100'):
+    def __init__(self, path = '../js_ws/src/models/model_9_15_20_26_100', device = 'cpu'):
         self.bridge = CvBridge()
-        self.predictor = predict_coord(path)
+        # self.predictor = predict_coord(path)
+        self.predictor = predict_coord(path, device=device)
     
     def get_rgb_depth_segmentation(self):
         '''
         get rgb, depth, segmentation image
         '''
-        print("getting image from realsense")
+
+        # print("getting image from realsense")
+
         data = rospy.wait_for_message('/camera/color/image_raw',Image)
         data2 = rospy.wait_for_message('/camera/aligned_depth_to_color/image_raw',Image)
-        
+
+        # print("1")
+
         self.cv_image = self.bridge.imgmsg_to_cv2(data,"bgr8")
         self.cv_image_depth = self.bridge.imgmsg_to_cv2(data2,"32FC1") # original depth unit is milimeter
 
-        # for test 
-        print("cv_image.shape : ", self.cv_image.shape)
-        print("cv_image_depth.shape : ", self.cv_image_depth.shape)
+        # print("2")
+
+        # for test : (720, 1280) -> need to be 480, 640
+        # print("cv_image.shape : ", self.cv_image.shape)
+        # print("cv_image_depth.shape : ", self.cv_image_depth.shape)
+
+        # print("3")
 
         self.image_mask, self.rgbd_image_list = self.predictor.predict_seg(self.cv_image, self.cv_image_depth)
+        
+        # print("end...")
 
     def segmentation_to_pointcloud(self, searching_class = -1, class_n = 4):
         '''
@@ -115,7 +126,7 @@ if __name__ == '__main__':
     # Ignore warnings in obj loader
     o3d.utility.set_verbosity_level(o3d.utility.VerbosityLevel.Error)
     
-    cam = camera_node('models/model_9_15_20_26_100')
+    cam = camera_node('models/model_9_20_20_1_100', device='cuda')
     rospy.init_node("segmentation_to_world")
 
     iter = 1

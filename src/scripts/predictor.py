@@ -12,7 +12,7 @@ import open3d as o3d
 SEG_CLASS_NAMES = ['bg','roll','sauce','snack']
 
 class predictor():
-  def __init__(self, path, device= 'cpu'):
+  def __init__(self, path, device='cpu'):
     self.path = path
     self.device= device
     self.model = FCN18(4).to(self.device)
@@ -95,8 +95,8 @@ class predictor():
     return test_image_mask, (rgbd_out_class1, rgbd_out_class2, rgbd_out_class3)
 
 class predict_coord(predictor):
-  def __init__(self, path):
-    super(predict_coord, self).__init__(path)
+  def __init__(self, path, device='cpu'):
+    super(predict_coord, self).__init__(path, device)
 
     # by cv2.calibrateCamera
     self.intrinsic = o3d.camera.PinholeCameraIntrinsic()

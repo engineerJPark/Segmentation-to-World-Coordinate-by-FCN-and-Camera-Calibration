@@ -28,7 +28,7 @@ if __name__ == '__main__':
 
   # resume training
   print("resume training ... ")
-  PATH = 'realworld/fcn_model/model_9_15_1_50_100'
+  PATH = 'realworld/fcn_model/model_9_15_20_26_100'
   checkpoint = torch.load(PATH)
   model.load_state_dict(checkpoint['model_state_dict'])
 
@@ -46,8 +46,8 @@ if __name__ == '__main__':
   
   epochs = 100
   lr = 1e-4
-  weight_decay = 1e-5
-  momentum = 0.99
+  weight_decay = 1e-8
+  momentum = 0.9
   
   optimizer = optim.SGD(model.parameters(), lr=lr, momentum=momentum, weight_decay=weight_decay)
   criterion = nn.CrossEntropyLoss(ignore_index=-1).to(device)
