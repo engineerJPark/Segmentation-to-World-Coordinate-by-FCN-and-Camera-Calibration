@@ -3,7 +3,8 @@
 - Grasping Project for Korea University Robot Club, KAsimov.
 - Segmentation by Fully Convolutional Network.
     - [Paper Link](https://arxiv.org/abs/1411.4038)
-- Backbone by ResNet 18 pretrained on ImageNet.
+- Backbone by ResNet 18 pretrained on ImageNet. (Deprecated)
+- Backbone by VGG 16 pretrained on ImageNet.
 - Full model is Pretrained on PASCAL VOC 2012.
 - Fine tuned on Own dataset, for 3 classes.
 
