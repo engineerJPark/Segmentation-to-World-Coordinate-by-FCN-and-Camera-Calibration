@@ -126,7 +126,7 @@ if __name__ == '__main__':
     # Ignore warnings in obj loader
     o3d.utility.set_verbosity_level(o3d.utility.VerbosityLevel.Error)
     
-    cam = camera_node('models/model_9_20_20_1_100', device='cuda')
+    cam = camera_node('models/model_9_21_3_51_100', device='cuda')
     rospy.init_node("segmentation_to_world")
 
     iter = 1
